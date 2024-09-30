@@ -1,0 +1,14 @@
+pandoc: '3.2'
+pkgdown: 2.1.1.9000
+pkgdown_sha: 0a18bc718640aee7160a0ebbcdef5ecaae2ac4a4
+articles:
+  v1.sommer.quick.start: v1.sommer.quick.start.html
+  v2.sommer.changes.and.faqs: v2.sommer.changes.and.faqs.html
+  v3.sommer.qg: v3.sommer.qg.html
+  v4.sommer.gxe: v4.sommer.gxe.html
+  v5.sommer.vs.lme4: v5.sommer.vs.lme4.html
+  v6.sommer.spatial: v6.sommer.spatial.html
+last_built: 2024-09-30T05:14Z
+urls:
+  reference: https://github.com/covaruber/sommer/reference
+  article: https://github.com/covaruber/sommer/articles

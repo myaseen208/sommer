@@ -1,0 +1,61 @@
+url: https://github.com/covaruber/sommer
+
+home:
+  title: sommer
+  description: Solving Mixed Model Equations in R
+
+
+template:
+  bootstrap: 5
+  params:
+    bootswatch: united
+    ganalytics: UA-116716530-2
+    docsearch:
+      api_key: bdafb7ea4490644e670f470ee3ef537f
+      index_name: sommer
+
+
+toc:
+  depth: 3
+
+authors:
+  Giovanny Covarrubias-Pazaran:
+    href: https://github.com/covaruber
+  
+development:
+  mode: unreleased
+
+
+navbar:
+  title: sommer
+  type: default
+  left:
+    - icon: fa-home fa-lg
+      text: Home
+      href: index.html
+    - icon: fa-code
+      text: Reference
+      href: reference/index.html
+    - icon: fa-file-o
+      text: Vignettes
+      menu:
+      - text: "Quick Start"
+        href: articles/v1.sommer.quick.start.html
+      - text: "FAQ"
+        href: articles/v2.sommer.changes.and.faqs.html
+      - text: "Quantitative Genetics"
+        href: articles/v3.sommer.qg.html
+      - text: "GxE models"
+        href: articles/v4.sommer.gxe.html
+      - text: "sommer vs lme4"
+        href: articles/v5.sommer.vs.lme4.html
+      - text: "Spatial"
+        href: articles/v6.sommer.spatial.html
+    - icon: fa-newspaper-o
+      text: News
+      href: news/index.html
+  right:
+    - text: "GitHub"
+      href: https://github.com/covaruber/sommer
+      icon: fa-github
+      aria-label: "GitHub repository"

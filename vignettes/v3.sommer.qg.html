@@ -1,0 +1,1461 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<meta name="author" content="Giovanny Covarrubias-Pazaran" />
+
+<meta name="date" content="2024-09-29" />
+
+<title>Quantitative genetics using the sommer package</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Quantitative genetics using the sommer
+package</h1>
+<h4 class="author">Giovanny Covarrubias-Pazaran</h4>
+<h4 class="date">2024-09-29</h4>
+
+
+
+<p>The sommer package was developed to provide R users with a powerful
+and reliable multivariate mixed model solver for different genetic and
+non-genetic analyses in diploid and polyploid organisms. This package
+allows the user to estimate variance components for a mixed model with
+the advantages of specifying the variance-covariance structure of the
+random effects, specifying heterogeneous variances, and obtaining other
+parameters such as BLUPs, BLUEs, residuals, fitted values, variances for
+fixed and random effects, etc. The core algorithms of the package are
+coded in C++ using the Armadillo library to optimize dense matrix
+operations common in the derect-inversion algorithms. Although the
+vignette shows examples using the mmer function, the mmec function can
+be faster when working with more records than coefficients to be
+estimated and we highly recommend to shift to the use of the
+<code>mmec</code> function.</p>
+<p>The package is focused on problems of the type p &gt; n related to
+genomic prediction (hybrid prediction &amp; genomic selection) and GWAS
+analysis, although any general mixed model can be fitted as well. The
+package provides kernels to estimate additive (<code>A.mat</code>),
+dominance (<code>D.mat</code>), and epistatic (<code>E.mat</code>)
+relationship matrices that have been shown to increase prediction
+accuracy under certain scenarios or simply to estimate the variance
+components of such. The package provides flexibility to fit other
+genetic models such as full and half diallel models as well.</p>
+<p>The vignettes aim to provide several examples in how to use the
+sommer package under different scenarios. We will spend the rest of the
+space providing examples for:</p>
+<p><strong>SECTION 1: Introduction </strong></p>
+<ol style="list-style-type: decimal">
+<li>Background in linear algebra</li>
+</ol>
+<p><strong>SECTION 2: Topics in quantitative genetics </strong></p>
+<ol style="list-style-type: decimal">
+<li>Heritability (<span class="math inline">\(h^2\)</span>)
+calculation</li>
+<li>Specifying heterogeneous variances in mixed models</li>
+<li>Using the <code>vpredict()</code> calculator</li>
+<li>Half and full diallel designs (using the overlay)</li>
+<li>Genomic selection (predicting mendelian sampling)
+<ul>
+<li>GBLUP</li>
+<li>rrBLUP</li>
+</ul></li>
+<li>Indirect genetic effects</li>
+<li>Single cross prediction (hybrid prediction)</li>
+<li>Spatial modeling (using the 2-dimensional splines)</li>
+<li>Multivariate genetic models and genetic correlations</li>
+</ol>
+<p><strong>SECTION 3: Special topics in quantitative
+genetics</strong></p>
+<ol style="list-style-type: decimal">
+<li>Partitioned model</li>
+<li>UDU’ decomposition</li>
+<li>Mating designs</li>
+<li>GWAS by GBLUP</li>
+<li>Reduced models</li>
+</ol>
+<div id="section-1-introduction" class="section level2">
+<h2>SECTION 1: Introduction</h2>
+<div id="backgrounds-in-linear-algebra" class="section level3">
+<h3>Backgrounds in linear algebra</h3>
+<p>The core of the package is the <code>mmer()</code> and
+<code>mmec</code> functions which solve the mixed model equations. The
+functions are an interface to call the <code>NR</code> Direct-Inversion
+Newton-Raphson or Average Information or mme-based Average Information
+(Tunnicliffe 1989; Gilmour et al. 1995; Lee et al. 2016). Since version
+2.0, sommer can handle multivariate models. Following Maier et
+al. (2015), the multivariate (and by extension the univariate) mixed
+model implemented has the form:</p>
+<p><br></p>
+<p><span class="math inline">\(y_1 = X_1\beta_1 + Z_1u_1 +
+\epsilon_1\)</span></p>
+<p><span class="math inline">\(y_2 = X_2\beta_2 + Z_2u_2 +
+\epsilon_2\)</span></p>
+<p>…</p>
+<p><span class="math inline">\(y_i = X_i\beta_i + Z_iu_i +
+\epsilon_i\)</span></p>
+<p><br></p>
+<p>where <span class="math inline">\(y_i\)</span> is a vector of trait
+phenotypes, <span class="math inline">\(\beta_i\)</span> is a vector of
+fixed effects, <span class="math inline">\(u_i\)</span> is a vector of
+random effects for individuals and <span class="math inline">\(e_i\)</span> are residuals for trait
+<code>i</code> (i = 1, …, t). The random effects (<span class="math inline">\(u_1\)</span> … <span class="math inline">\(u_i\)</span> and <span class="math inline">\(e_i\)</span>) are assumed to be normally
+distributed with mean zero. X and Z are incidence matrices for fixed and
+random effects respectively. The distributions of the multivariate
+response and the phenotypic variance covariance (V) are:</p>
+<p><br></p>
+<p><span class="math inline">\(Y = X\beta + ZU + \epsilon_i\)</span></p>
+<p><br></p>
+<p>Y ~ MVN(<span class="math inline">\(X\beta\)</span>, V)</p>
+<p><br></p>
+<p><span class="math display">\[\mathbf{Y} = \left[\begin{array}
+{r}
+y_1 \\
+y_2 \\
+... \\
+y_t \\
+\end{array}\right]
+\]</span></p>
+<p><br></p>
+<p><span class="math display">\[\mathbf{X} = \left[\begin{array}
+{rrr}
+X_1 &amp; ... &amp; ... \\
+\vdots &amp; \ddots &amp; \vdots\\
+... &amp; ... &amp; X_t \\
+\end{array}\right]
+\]</span></p>
+<p><br></p>
+<p><span class="math display">\[\mathbf{V} = \left[\begin{array}
+{rrr}
+Z_1 K{\sigma^2_{g_{1}}} Z_1&#39; + H{\sigma^2_{\epsilon_{1}}} &amp; ...
+&amp; Z_1 K{\sigma_{g_{1,t}}} Z_t&#39; + H{\sigma_{\epsilon_{1,t}}}\\
+\vdots &amp; \ddots &amp; \vdots\\
+Z_1 K{\sigma_{g_{1,t}}} Z_t&#39; + H{\sigma_{\epsilon_{1,t}}} &amp; ...
+&amp; Z_t K{\sigma^2_{g_{t}}} Z_t&#39; + H{\sigma^2_{\epsilon_{t}}} \\
+\end{array}\right]
+\]</span></p>
+<p><br></p>
+<p>where K is the relationship or covariance matrix for the kth random
+effect (u=1,…,k), and R=I is an identity matrix for the residual term.
+The terms <span class="math inline">\(\sigma^2_{g_{i}}\)</span> and
+<span class="math inline">\(\sigma^2_{\epsilon_{i}}\)</span> denote the
+genetic (or any of the kth random terms) and residual variance of trait
+<code>i</code>, respectively and <span class="math inline">\(\sigma_{g_{_{ij}}}\)</span> and <span class="math inline">\(\sigma_{\epsilon_{_{ij}}}\)</span> the genetic (or
+any of the kth random terms) and residual covariance between traits
+<code>i</code> and <code>j</code> (i=1,…,t, and j=1,…,t). The algorithm
+implemented optimizes the log likelihood:</p>
+<p><br></p>
+<p><span class="math inline">\(logL = 1/2 * ln(|V|) + ln(X&#39;|V|X) +
+Y&#39;PY\)</span></p>
+<p><br></p>
+<p>where || is the determinant of a matrix. The REML estimates are
+updated using a Newton optimization algorithm of the form:</p>
+<p><br></p>
+<p><span class="math inline">\(\theta^{k+1} = \theta^{k} +
+(H^{k})^{-1}*\frac{dL}{d\sigma^2_i}|\theta^k\)</span></p>
+<p><br></p>
+<p>Where <span class="math inline">\(\theta\)</span> is the vector of
+variance components for random effects and covariance components among
+traits, <span class="math inline">\(H^{-1}\)</span> is the inverse of
+the Hessian matrix of second derivatives for the kth cycle, <span class="math inline">\(\frac{dL}{d\sigma^2_i}\)</span> is the vector of
+first derivatives of the likelihood with respect to the
+variance-covariance components. The Eigen decomposition of the
+relationship matrix proposed by Lee and Van Der Werf (2016) was included
+in the Newton-Raphson algorithm to improve time efficiency.
+Additionally, the popular <code>vpredict()</code> function to estimate
+standard errors for linear combinations of variance components
+(i.e. heritabilities and genetic correlations) was added to the package
+as well.</p>
+<p>Please refer to the canonical papers listed in the Literature section
+to check how the algorithms work. We have tested widely the methods to
+make sure they provide the same solution when the likelihood behaves
+well, but for complex problems they might lead to slightly different
+answers. If you have any concern please contact me at <a href="mailto:cova_ruber@live.com.mx" class="email">cova_ruber@live.com.mx</a>.</p>
+<p>In the following section we will go in detail over several examples
+on how to use mixed models in univariate and multivariate case and their
+use in quantitative genetics.</p>
+<p><br></p>
+</div>
+</div>
+<div id="section-2-topics-in-quantitative-genetics" class="section level2">
+<h2>SECTION 2: Topics in quantitative genetics</h2>
+<div id="marker-and-non-marker-based-heritability-calculation" class="section level3">
+<h3>1) Marker and non-marker based heritability calculation</h3>
+<p>Heritability is one of the most popular parameters among the breeding
+and genetics communities because of the insight it provides in the
+inheritance of the trait and potential selection response. Heritability
+is usually estimated as narrow sense (<span class="math inline">\(h^2\)</span>; only additive variance in the
+numerator <span class="math inline">\(\sigma^2_A\)</span>), and broad
+sense (<span class="math inline">\(H^2\)</span>; all genetic variance in
+the numerator <span class="math inline">\(\sigma^2_G\)</span>).</p>
+<p>In a classical breeding experiment with no molecular markers, special
+designs are performed to estimate and dissect the additive (<span class="math inline">\(\sigma^2_A\)</span>) and non-additive (e.g.,
+dominance <span class="math inline">\(\sigma^2_D\)</span>, and epistatic
+<span class="math inline">\(\sigma^2_E\)</span>) variance along with
+environmental variability. Designs such as generation analysis, North
+Carolina designs are used to dissect <span class="math inline">\(\sigma^2_A\)</span> and <span class="math inline">\(\sigma^2_D\)</span> to estimate the narrow sense
+heritability (<span class="math inline">\(h^2\)</span>) using only <span class="math inline">\(\sigma^2_A\)</span> in the numerator. When no
+special design is available we can still disect the genetic variance
+(<span class="math inline">\(\sigma^2_G\)</span>) and estimate the broad
+sense heritability. In this first example we will show the broad sense
+estimation which doesn’t use covariance matrices for the genotypic
+effect (e.g., genomic-additive relationship matrices). For big models
+with no relationship matrices, sommer’s direct inversion is a bad idea
+to use but we will still show how to do it, but keep in mind that for
+very sparse models with no relationship matrices or other special
+covariance structures we recommend using the <code>lmer()</code>
+function from the lme4 package or any other package using MME-based
+algorithms (e.g., asreml-R).</p>
+<p>The following dataset has 41 potato lines evaluated in 5 locations
+across 3 years in an RCBD design. We show how to fit the model and
+extract the variance components to calculate the <span class="math inline">\(h^2\)</span>.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(sommer)</span></code></pre></div>
+<pre><code>## Loading required package: Matrix</code></pre>
+<pre><code>## Loading required package: MASS</code></pre>
+<pre><code>## Loading required package: crayon</code></pre>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="fu">data</span>(DT_example)</span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a>DT <span class="ot">&lt;-</span> DT_example</span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a>A <span class="ot">&lt;-</span> A_example</span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a></span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a>ans1 <span class="ot">&lt;-</span> <span class="fu">mmec</span>(Yield<span class="sc">~</span><span class="dv">1</span>,</span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a>             <span class="at">random=</span> <span class="sc">~</span> Name <span class="sc">+</span> Env <span class="sc">+</span> Env<span class="sc">:</span>Name <span class="sc">+</span> Env<span class="sc">:</span>Block,</span>
+<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a>             <span class="at">rcov=</span> <span class="sc">~</span> units, <span class="at">nIters=</span><span class="dv">3</span>,</span>
+<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a>             <span class="at">data=</span>DT, <span class="at">verbose =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb5-9"><a href="#cb5-9" tabindex="-1"></a><span class="fu">summary</span>(ans1)<span class="sc">$</span>varcomp</span></code></pre></div>
+<pre><code>##                        VarComp    VarCompSE       Zratio Constraint
+## Name:isc:isc      5.922491e+00 4.033870e-16 1.468191e+16   Positive
+## Env:isc:isc       1.115162e+02 1.001923e-14 1.113021e+16   Positive
+## Env:Name:isc:isc  1.973759e+01 1.155087e-16 1.708752e+17   Positive
+## Env:Block:isc:isc 1.000000e-10 1.692545e-04 5.908264e-07      Fixed
+## units:isc:isc     1.000000e-10 1.098857e-05 9.100366e-06   Positive</code></pre>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a>(n.env <span class="ot">&lt;-</span> <span class="fu">length</span>(<span class="fu">levels</span>(DT<span class="sc">$</span>Env)))</span></code></pre></div>
+<pre><code>## [1] 3</code></pre>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a><span class="co"># vpredict(ans1, h2 ~ V1 / ( V1 + (V3/n.env) + (V5/(2*n.env)) ) )</span></span></code></pre></div>
+<p>That is an estimate of broad-sense heritability.</p>
+<p>Recently with markers becoming cheaper, thousand of markers can be
+run in the breeding materials. When markers are available, a special
+design is not neccesary to dissect the additive genetic variance. The
+availability of the additive, dominance and epistatic relationship
+matrices allow us to estimate <span class="math inline">\(\sigma^2_A\)</span>, <span class="math inline">\(\sigma^2_D\)</span> and <span class="math inline">\(\sigma^2_I\)</span>, although given that A, D and
+E are not orthogonal the interpretation of models that fit more than the
+A matrix at the same time becomes cumbersome.</p>
+<p>Assume you have a population (even unreplicated) in the field but in
+addition we have genetic markers. Now we can fit the model and estimate
+the genomic heritability that explains a portion of the additive genetic
+variance (with high marker density <span class="math inline">\(\sigma^2_A\)</span> = <span class="math inline">\(\sigma^2_{markers}\)</span>)</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a><span class="fu">data</span>(DT_cpdata)</span>
+<span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a>DT <span class="ot">&lt;-</span> DT_cpdata</span>
+<span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a>GT <span class="ot">&lt;-</span> GT_cpdata</span>
+<span id="cb10-4"><a href="#cb10-4" tabindex="-1"></a>MP <span class="ot">&lt;-</span> MP_cpdata</span>
+<span id="cb10-5"><a href="#cb10-5" tabindex="-1"></a>DT<span class="sc">$</span>idd <span class="ot">&lt;-</span>DT<span class="sc">$</span>id; DT<span class="sc">$</span>ide <span class="ot">&lt;-</span>DT<span class="sc">$</span>id</span>
+<span id="cb10-6"><a href="#cb10-6" tabindex="-1"></a><span class="do">### look at the data</span></span>
+<span id="cb10-7"><a href="#cb10-7" tabindex="-1"></a>A <span class="ot">&lt;-</span> <span class="fu">A.mat</span>(GT) <span class="co"># additive relationship matrix</span></span>
+<span id="cb10-8"><a href="#cb10-8" tabindex="-1"></a>D <span class="ot">&lt;-</span> <span class="fu">D.mat</span>(GT) <span class="co"># dominance relationship matrix</span></span>
+<span id="cb10-9"><a href="#cb10-9" tabindex="-1"></a>E <span class="ot">&lt;-</span> <span class="fu">E.mat</span>(GT) <span class="co"># epistatic relationship matrix</span></span>
+<span id="cb10-10"><a href="#cb10-10" tabindex="-1"></a>ans.ADE <span class="ot">&lt;-</span> <span class="fu">mmer</span>(color<span class="sc">~</span><span class="dv">1</span>, </span>
+<span id="cb10-11"><a href="#cb10-11" tabindex="-1"></a>                 <span class="at">random=</span><span class="sc">~</span><span class="fu">vsr</span>(id,<span class="at">Gu=</span>A) <span class="sc">+</span> <span class="fu">vsr</span>(idd,<span class="at">Gu=</span>D), </span>
+<span id="cb10-12"><a href="#cb10-12" tabindex="-1"></a>                 <span class="at">rcov=</span><span class="sc">~</span>units, <span class="at">nIters=</span><span class="dv">3</span>,</span>
+<span id="cb10-13"><a href="#cb10-13" tabindex="-1"></a>                 <span class="at">data=</span>DT,<span class="at">verbose =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb10-14"><a href="#cb10-14" tabindex="-1"></a>(<span class="fu">summary</span>(ans.ADE)<span class="sc">$</span>varcomp)</span></code></pre></div>
+<pre><code>##                       VarComp    VarCompSE   Zratio Constraint
+## u:id.color-color  0.003486639 0.0011076709 3.147721   Positive
+## u:idd.color-color 0.001286778 0.0005071774 2.537136   Positive
+## units.color-color 0.002152054 0.0002976821 7.229372   Positive</code></pre>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a><span class="fu">vpredict</span>(ans.ADE, h2 <span class="sc">~</span> (V1) <span class="sc">/</span> ( V1<span class="sc">+</span>V3) ) <span class="co"># narrow sense</span></span></code></pre></div>
+<pre><code>##     Estimate         SE
+## h2 0.6183417 0.08605268</code></pre>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" tabindex="-1"></a><span class="fu">vpredict</span>(ans.ADE, h2 <span class="sc">~</span> (V1<span class="sc">+</span>V2) <span class="sc">/</span> ( V1<span class="sc">+</span>V2<span class="sc">+</span>V3) ) <span class="co"># broad-sense</span></span></code></pre></div>
+<pre><code>##     Estimate         SE
+## h2 0.6892552 0.05896317</code></pre>
+<p>In this example we showed how to estimate the additive (<span class="math inline">\(\sigma^2_A\)</span>) and dominance (<span class="math inline">\(\sigma^2_D\)</span>) variance components based on
+markers and estimate broad (<span class="math inline">\(H^2\)</span>)
+and narrow-sense heritability (<span class="math inline">\(h^2\)</span>). Notice that we used the
+<code>vsr()</code> function which indicates that the random effect
+inside the parenthesis (i.e. <code>id</code>, <code>idd</code> or
+<code>ide</code>) has a covariance matrix (A, D, or E), that will be
+specified in the <code>Gu</code> argument of the <code>vsr()</code>
+function. Please DO NOT provide the inverse, but rather the original
+covariance matrix.</p>
+</div>
+<div id="specifying-heterogeneous-variances-in-univariate-models" class="section level3">
+<h3>2) Specifying heterogeneous variances in univariate models</h3>
+<p>Very often in multi-environment trials, the assumption that genetic
+variance is the same across locations may be too naive. Because of that,
+specifying a general genetic component and a location-specific genetic
+variance is the way to go.</p>
+<p>We estimate variance components for <span class="math inline">\(GCA_2\)</span> and <span class="math inline">\(SCA\)</span> specifying the variance
+structure.</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" tabindex="-1"></a><span class="co"># data(DT_cornhybrids)</span></span>
+<span id="cb16-2"><a href="#cb16-2" tabindex="-1"></a><span class="co"># DT &lt;- DT_cornhybrids</span></span>
+<span id="cb16-3"><a href="#cb16-3" tabindex="-1"></a><span class="co"># DTi &lt;- DTi_cornhybrids</span></span>
+<span id="cb16-4"><a href="#cb16-4" tabindex="-1"></a><span class="co"># GT &lt;- GT_cornhybrids</span></span>
+<span id="cb16-5"><a href="#cb16-5" tabindex="-1"></a><span class="co"># </span><span class="al">###</span><span class="co"> fit the model</span></span>
+<span id="cb16-6"><a href="#cb16-6" tabindex="-1"></a><span class="co"># modFD &lt;- mmec(Yield~1, </span></span>
+<span id="cb16-7"><a href="#cb16-7" tabindex="-1"></a><span class="co">#               random=~ vsc(atc(Location,c(&quot;3&quot;,&quot;4&quot;)),isc(GCA2)), </span></span>
+<span id="cb16-8"><a href="#cb16-8" tabindex="-1"></a><span class="co">#               rcov= ~ vsc(dsc(Location),isc(units)), nIters=3,</span></span>
+<span id="cb16-9"><a href="#cb16-9" tabindex="-1"></a><span class="co">#               returnParam = F,</span></span>
+<span id="cb16-10"><a href="#cb16-10" tabindex="-1"></a><span class="co">#               data=DT, verbose = FALSE)</span></span>
+<span id="cb16-11"><a href="#cb16-11" tabindex="-1"></a><span class="co"># summary(modFD)</span></span></code></pre></div>
+<p>In the previous example we showed how the <code>atr()</code> function
+is used in the <code>mmer()</code> solver. By using the
+<code>atr()</code> function you can specify that i.e. the GCA2 has a
+different variance in different Locations, in this case locations 3 and
+4, but also a main GCA variance. This is considered a CS + DIAG
+(compound symmetry + diagonal) model.</p>
+<p>In addition, other functions can be added on top to fit models with
+covariance structures, i.e. the <code>Gu</code> argument from the
+<code>vsr()</code> function to indicate a covariance matrix (A, pedigree
+or genomic relationship matrix)</p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" tabindex="-1"></a><span class="co"># data(DT_cornhybrids)</span></span>
+<span id="cb17-2"><a href="#cb17-2" tabindex="-1"></a><span class="co"># DT &lt;- DT_cornhybrids</span></span>
+<span id="cb17-3"><a href="#cb17-3" tabindex="-1"></a><span class="co"># DTi &lt;- DTi_cornhybrids</span></span>
+<span id="cb17-4"><a href="#cb17-4" tabindex="-1"></a><span class="co"># GT &lt;- as(GT_cornhybrids, Class = &quot;dgCMatrix&quot;)</span></span>
+<span id="cb17-5"><a href="#cb17-5" tabindex="-1"></a><span class="co"># GT[1:4,1:4]</span></span>
+<span id="cb17-6"><a href="#cb17-6" tabindex="-1"></a><span class="co"># DT=DT[with(DT, order(Location)), ]</span></span>
+<span id="cb17-7"><a href="#cb17-7" tabindex="-1"></a><span class="co"># </span><span class="al">###</span><span class="co"> fit the model</span></span>
+<span id="cb17-8"><a href="#cb17-8" tabindex="-1"></a><span class="co"># modFD &lt;- mmec(Yield~1, </span></span>
+<span id="cb17-9"><a href="#cb17-9" tabindex="-1"></a><span class="co">#               random=~ vsc(atc(Location,c(&quot;3&quot;,&quot;4&quot;)),isc(GCA2),Gu=GT), </span></span>
+<span id="cb17-10"><a href="#cb17-10" tabindex="-1"></a><span class="co">#               rcov= ~ vsc(dsc(Location),isc(units)), nIters=3,</span></span>
+<span id="cb17-11"><a href="#cb17-11" tabindex="-1"></a><span class="co">#               data=DT, verbose = FALSE)</span></span>
+<span id="cb17-12"><a href="#cb17-12" tabindex="-1"></a><span class="co"># summary(modFD)</span></span></code></pre></div>
+</div>
+<div id="using-the-vpredict-calculator" class="section level3">
+<h3>3) Using the vpredict calculator</h3>
+<p>Sometimes the user needs to calculate ratios or functions of specific
+variance-covariance components and obtain the standard errors for such
+parameters. Examples of these are the genetic correlations,
+heritabilities, etc. Using the CPdata we will show how to estimate the
+heritability and the standard error using the <code>vpredict()</code>
+function that uses the delta method to come up with these parameters.
+This can be extended for any linear combination of the variance
+components.</p>
+<div id="standar-error-for-heritability" class="section level4">
+<h4>3.1) Standar error for heritability</h4>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" tabindex="-1"></a><span class="fu">data</span>(DT_cpdata)</span>
+<span id="cb18-2"><a href="#cb18-2" tabindex="-1"></a>DT <span class="ot">&lt;-</span> DT_cpdata</span>
+<span id="cb18-3"><a href="#cb18-3" tabindex="-1"></a>GT <span class="ot">&lt;-</span> GT_cpdata</span>
+<span id="cb18-4"><a href="#cb18-4" tabindex="-1"></a>MP <span class="ot">&lt;-</span> MP_cpdata</span>
+<span id="cb18-5"><a href="#cb18-5" tabindex="-1"></a><span class="do">### look at the data</span></span>
+<span id="cb18-6"><a href="#cb18-6" tabindex="-1"></a>A <span class="ot">&lt;-</span> <span class="fu">A.mat</span>(GT) <span class="co"># additive relationship matrix</span></span>
+<span id="cb18-7"><a href="#cb18-7" tabindex="-1"></a>ans <span class="ot">&lt;-</span> <span class="fu">mmer</span>(color<span class="sc">~</span><span class="dv">1</span>, </span>
+<span id="cb18-8"><a href="#cb18-8" tabindex="-1"></a>                <span class="at">random=</span><span class="sc">~</span><span class="fu">vsr</span>(id,<span class="at">Gu=</span>A), </span>
+<span id="cb18-9"><a href="#cb18-9" tabindex="-1"></a>                <span class="at">rcov=</span><span class="sc">~</span>units, <span class="at">nIters=</span><span class="dv">3</span>,</span>
+<span id="cb18-10"><a href="#cb18-10" tabindex="-1"></a>                <span class="at">data=</span>DT, <span class="at">verbose =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb18-11"><a href="#cb18-11" tabindex="-1"></a>(<span class="fu">summary</span>(ans.ADE)<span class="sc">$</span>varcomp)</span></code></pre></div>
+<pre><code>##                       VarComp    VarCompSE   Zratio Constraint
+## u:id.color-color  0.003486639 0.0011076709 3.147721   Positive
+## u:idd.color-color 0.001286778 0.0005071774 2.537136   Positive
+## units.color-color 0.002152054 0.0002976821 7.229372   Positive</code></pre>
+<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" tabindex="-1"></a><span class="fu">vpredict</span>(ans, h2 <span class="sc">~</span> (V1) <span class="sc">/</span> ( V1<span class="sc">+</span>V2) )</span></code></pre></div>
+<pre><code>##     Estimate         SE
+## h2 0.6405467 0.05805209</code></pre>
+<p>The same can be used for multivariate models. Please check the
+documentation of the <code>vpredict</code> function to see more
+examples.</p>
+</div>
+<div id="standar-error-for-genetic-correlation" class="section level4">
+<h4>3.2) Standar error for genetic correlation</h4>
+<div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" tabindex="-1"></a><span class="do">## just silenced to avoid too much time building the vignettes</span></span>
+<span id="cb22-2"><a href="#cb22-2" tabindex="-1"></a><span class="co"># data(DT_btdata)</span></span>
+<span id="cb22-3"><a href="#cb22-3" tabindex="-1"></a><span class="co"># DT &lt;- DT_btdata</span></span>
+<span id="cb22-4"><a href="#cb22-4" tabindex="-1"></a><span class="co"># mix3 &lt;- mmer(cbind(tarsus, back) ~ sex,</span></span>
+<span id="cb22-5"><a href="#cb22-5" tabindex="-1"></a><span class="co">#                random = ~ vsr(dam, Gtc=unsm(2)) + vsr(fosternest,Gtc=diag(2)),</span></span>
+<span id="cb22-6"><a href="#cb22-6" tabindex="-1"></a><span class="co">#                rcov=~vsr(units,Gtc=unsm(2)), nIters=3,</span></span>
+<span id="cb22-7"><a href="#cb22-7" tabindex="-1"></a><span class="co">#                data = DT, verbose = FALSE)</span></span>
+<span id="cb22-8"><a href="#cb22-8" tabindex="-1"></a><span class="co"># summary(mix3)</span></span>
+<span id="cb22-9"><a href="#cb22-9" tabindex="-1"></a><span class="co"># #### calculate the genetic correlation</span></span>
+<span id="cb22-10"><a href="#cb22-10" tabindex="-1"></a><span class="co"># vpredict(mix3, gen.cor ~ V2 / sqrt(V1*V3))</span></span></code></pre></div>
+</div>
+</div>
+<div id="half-and-full-diallel-designs-use-of-the-overlay" class="section level3">
+<h3>4) Half and full diallel designs (use of the overlay)</h3>
+<p>When breeders are looking for the best single-cross combinations,
+diallel designs have been by far the most used design in crops like
+maize. There are 4 types of diallel designs depending on whether
+reciprocal and self-crosses (omission of parents) are performed (full
+diallel with parents n^2; full diallel without parents n(n-1); half
+diallel with parents 1/2 * n(n+1); half diallel without parents 1/2 *
+n(n-1) ). In this example we will show a full diallel design (reciprocal
+crosses are performed) and half diallel designs (only one of the
+directions is performed).</p>
+<p>In the first data set we show a full diallel among 40 lines from 2
+heterotic groups, 20 in each. Therefore 400 possible hybrids are
+possible. We have pehnotypic data for 100 of them across 4 locations. We
+use the data available to fit a model of the form:</p>
+<p><br></p>
+<p><span class="math inline">\(y = X\beta + Zu_1 + Zu_2 + Zu_S +
+\epsilon\)</span></p>
+<p><br></p>
+<p>We estimate variance components for <span class="math inline">\(GCA_1\)</span>, <span class="math inline">\(GCA_2\)</span> and <span class="math inline">\(SCA\)</span> and use them to estimate
+heritability. Additionally BLUPs for GCA and SCA effects can be used to
+predict crosses.</p>
+<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" tabindex="-1"></a><span class="fu">data</span>(DT_cornhybrids)</span>
+<span id="cb23-2"><a href="#cb23-2" tabindex="-1"></a>DT <span class="ot">&lt;-</span> DT_cornhybrids</span>
+<span id="cb23-3"><a href="#cb23-3" tabindex="-1"></a>DTi <span class="ot">&lt;-</span> DTi_cornhybrids</span>
+<span id="cb23-4"><a href="#cb23-4" tabindex="-1"></a>GT <span class="ot">&lt;-</span> GT_cornhybrids</span>
+<span id="cb23-5"><a href="#cb23-5" tabindex="-1"></a></span>
+<span id="cb23-6"><a href="#cb23-6" tabindex="-1"></a>modFD <span class="ot">&lt;-</span> <span class="fu">mmec</span>(Yield<span class="sc">~</span>Location, </span>
+<span id="cb23-7"><a href="#cb23-7" tabindex="-1"></a>              <span class="at">random=</span><span class="sc">~</span>GCA1<span class="sc">+</span>GCA2<span class="sc">+</span>SCA, </span>
+<span id="cb23-8"><a href="#cb23-8" tabindex="-1"></a>              <span class="at">rcov=</span><span class="sc">~</span>units, <span class="at">nIters=</span><span class="dv">3</span>,</span>
+<span id="cb23-9"><a href="#cb23-9" tabindex="-1"></a>              <span class="at">data=</span>DT, <span class="at">verbose =</span> <span class="cn">FALSE</span>)</span></code></pre></div>
+<pre><code>## Updated VC is not positive definite, changing to EM step
+## Update using constraints
+## Updated VC is not positive definite, changing to EM step
+## Update using constraints</code></pre>
+<div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" tabindex="-1"></a>(suma <span class="ot">&lt;-</span> <span class="fu">summary</span>(modFD)<span class="sc">$</span>varcomp)</span></code></pre></div>
+<pre><code>##                    VarComp VarCompSE       Zratio Constraint
+## GCA1:isc:isc  1.000000e-10  36.89059 2.710718e-12      Fixed
+## GCA2:isc:isc  4.629216e+01  37.14297 1.246324e+00   Positive
+## SCA:isc:isc   8.937350e+01  21.56529 4.144322e+00   Positive
+## units:isc:isc 2.388020e+02  28.83389 8.281992e+00   Positive</code></pre>
+<div class="sourceCode" id="cb27"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" tabindex="-1"></a>Vgca <span class="ot">&lt;-</span> <span class="fu">sum</span>(suma[<span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>,<span class="dv">1</span>])</span>
+<span id="cb27-2"><a href="#cb27-2" tabindex="-1"></a>Vsca <span class="ot">&lt;-</span> suma[<span class="dv">3</span>,<span class="dv">1</span>]</span>
+<span id="cb27-3"><a href="#cb27-3" tabindex="-1"></a>Ve <span class="ot">&lt;-</span> suma[<span class="dv">4</span>,<span class="dv">1</span>]</span>
+<span id="cb27-4"><a href="#cb27-4" tabindex="-1"></a>Va <span class="ot">=</span> <span class="dv">4</span><span class="sc">*</span>Vgca</span>
+<span id="cb27-5"><a href="#cb27-5" tabindex="-1"></a>Vd <span class="ot">=</span> <span class="dv">4</span><span class="sc">*</span>Vsca</span>
+<span id="cb27-6"><a href="#cb27-6" tabindex="-1"></a>Vg <span class="ot">&lt;-</span> Va <span class="sc">+</span> Vd</span>
+<span id="cb27-7"><a href="#cb27-7" tabindex="-1"></a>(H2 <span class="ot">&lt;-</span> Vg <span class="sc">/</span> (Vg <span class="sc">+</span> (Ve)) )</span></code></pre></div>
+<pre><code>## [1] 0.6944174</code></pre>
+<div class="sourceCode" id="cb29"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" tabindex="-1"></a>(h2 <span class="ot">&lt;-</span> Va <span class="sc">/</span> (Vg <span class="sc">+</span> (Ve)) )</span></code></pre></div>
+<pre><code>## [1] 0.2369507</code></pre>
+<p>Don’t worry too much about the <code>h2</code> value, the data was
+simulated to be mainly dominance variance, therefore the <code>Va</code>
+was simulated extremely small leading to such value of narrow sense
+<code>h2</code>.</p>
+<p>In the second data set we show a small half diallel with 7 parents
+crossed in one direction. There are n(n-1)/2 possible crosses; 7(6)/2 =
+21 unique crosses. Parents appear as males or females indistictly. Each
+with two replications in a CRD. For a half diallel design a single GCA
+variance component for both males and females can be estimated and an
+SCA as well (<span class="math inline">\(\sigma^2_GCA\)</span> and <span class="math inline">\(\sigma^2_SCA\)</span> respectively), and BLUPs for
+GCA and SCA of the parents can be extracted. We will show first how to
+do so with the <code>mmer()</code> function using the
+<code>overlay()</code> function. The specific model here is:</p>
+<p><span class="math inline">\(y = X\beta + Zu_g + Zu_s +
+\epsilon\)</span></p>
+<div class="sourceCode" id="cb31"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" tabindex="-1"></a><span class="fu">data</span>(<span class="st">&quot;DT_halfdiallel&quot;</span>)</span>
+<span id="cb31-2"><a href="#cb31-2" tabindex="-1"></a>DT <span class="ot">&lt;-</span> DT_halfdiallel</span>
+<span id="cb31-3"><a href="#cb31-3" tabindex="-1"></a><span class="fu">head</span>(DT)</span></code></pre></div>
+<pre><code>##   rep geno male female     sugar
+## 1   1   12    1      2 13.950509
+## 2   2   12    1      2  9.756918
+## 3   1   13    1      3 13.906355
+## 4   2   13    1      3  9.119455
+## 5   1   14    1      4  5.174483
+## 6   2   14    1      4  8.452221</code></pre>
+<div class="sourceCode" id="cb33"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" tabindex="-1"></a>DT<span class="sc">$</span>femalef <span class="ot">&lt;-</span> <span class="fu">as.factor</span>(DT<span class="sc">$</span>female)</span>
+<span id="cb33-2"><a href="#cb33-2" tabindex="-1"></a>DT<span class="sc">$</span>malef <span class="ot">&lt;-</span> <span class="fu">as.factor</span>(DT<span class="sc">$</span>male)</span>
+<span id="cb33-3"><a href="#cb33-3" tabindex="-1"></a>DT<span class="sc">$</span>genof <span class="ot">&lt;-</span> <span class="fu">as.factor</span>(DT<span class="sc">$</span>geno)</span>
+<span id="cb33-4"><a href="#cb33-4" tabindex="-1"></a><span class="do">#### model using overlay</span></span>
+<span id="cb33-5"><a href="#cb33-5" tabindex="-1"></a>modh <span class="ot">&lt;-</span> <span class="fu">mmec</span>(sugar<span class="sc">~</span><span class="dv">1</span>, </span>
+<span id="cb33-6"><a href="#cb33-6" tabindex="-1"></a>             <span class="at">random=</span><span class="sc">~</span><span class="fu">vsc</span>(<span class="fu">isc</span>(<span class="fu">overlay</span>(femalef,malef)) )</span>
+<span id="cb33-7"><a href="#cb33-7" tabindex="-1"></a>             <span class="sc">+</span> genof, <span class="at">nIters=</span><span class="dv">3</span>,</span>
+<span id="cb33-8"><a href="#cb33-8" tabindex="-1"></a>             <span class="at">data=</span>DT, <span class="at">verbose =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb33-9"><a href="#cb33-9" tabindex="-1"></a><span class="fu">summary</span>(modh)<span class="sc">$</span>varcomp</span></code></pre></div>
+<pre><code>##                            VarComp    VarCompSE       Zratio Constraint
+## femalef:malef:isc:isc 5.780585e+00 8.281722e-17 6.979932e+16   Positive
+## genof:isc:isc         2.133867e+01 7.516095e-17 2.839064e+17   Positive
+## units:isc:isc         1.000000e-10 1.697717e-05 5.890264e-06   Positive</code></pre>
+<p>Notice how the <code>overlay()</code> argument makes the overlap of
+incidence matrices possible making sure that male and female are joint
+into a single random effect.</p>
+</div>
+<div id="genomic-selection-predicting-mendelian-sampling" class="section level3">
+<h3>5) Genomic selection: predicting mendelian sampling</h3>
+<p>In this section we will use wheat data from CIMMYT to show how
+genomic selection is performed. This is the case of prediction of
+specific individuals within a population. It basically uses a similar
+model of the form:</p>
+<p><br></p>
+<p><span class="math inline">\(y = X\beta + Zu + \epsilon\)</span></p>
+<p><br></p>
+<p>and takes advantage of the variance covariance matrix for the
+genotype effect known as the additive relationship matrix (A) and
+calculated using the <code>A.mat</code> function to establish
+connections among all individuals and predict the BLUPs for individuals
+that were not measured. The prediction accuracy depends on several
+factors such as the heritability (<span class="math inline">\(h^2\)</span>), training population used (TP), size
+of TP, etc.</p>
+<div class="sourceCode" id="cb35"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" tabindex="-1"></a><span class="fu">data</span>(DT_wheat)</span>
+<span id="cb35-2"><a href="#cb35-2" tabindex="-1"></a>DT <span class="ot">&lt;-</span> DT_wheat</span>
+<span id="cb35-3"><a href="#cb35-3" tabindex="-1"></a>GT <span class="ot">&lt;-</span> GT_wheat[,<span class="dv">1</span><span class="sc">:</span><span class="dv">200</span>]</span>
+<span id="cb35-4"><a href="#cb35-4" tabindex="-1"></a><span class="fu">colnames</span>(DT) <span class="ot">&lt;-</span> <span class="fu">paste0</span>(<span class="st">&quot;X&quot;</span>,<span class="dv">1</span><span class="sc">:</span><span class="fu">ncol</span>(DT))</span>
+<span id="cb35-5"><a href="#cb35-5" tabindex="-1"></a>DT <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(DT);DT<span class="sc">$</span>id <span class="ot">&lt;-</span> <span class="fu">as.factor</span>(<span class="fu">rownames</span>(DT))</span>
+<span id="cb35-6"><a href="#cb35-6" tabindex="-1"></a><span class="co"># select environment 1</span></span>
+<span id="cb35-7"><a href="#cb35-7" tabindex="-1"></a><span class="fu">rownames</span>(GT) <span class="ot">&lt;-</span> <span class="fu">rownames</span>(DT)</span>
+<span id="cb35-8"><a href="#cb35-8" tabindex="-1"></a>K <span class="ot">&lt;-</span> <span class="fu">A.mat</span>(GT) <span class="co"># additive relationship matrix</span></span>
+<span id="cb35-9"><a href="#cb35-9" tabindex="-1"></a><span class="fu">colnames</span>(K) <span class="ot">&lt;-</span> <span class="fu">rownames</span>(K) <span class="ot">&lt;-</span> <span class="fu">rownames</span>(DT)</span>
+<span id="cb35-10"><a href="#cb35-10" tabindex="-1"></a><span class="co"># GBLUP pedigree-based approach</span></span>
+<span id="cb35-11"><a href="#cb35-11" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">12345</span>)</span>
+<span id="cb35-12"><a href="#cb35-12" tabindex="-1"></a>y.trn <span class="ot">&lt;-</span> DT</span>
+<span id="cb35-13"><a href="#cb35-13" tabindex="-1"></a>vv <span class="ot">&lt;-</span> <span class="fu">sample</span>(<span class="fu">rownames</span>(DT),<span class="fu">round</span>(<span class="fu">nrow</span>(DT)<span class="sc">/</span><span class="dv">5</span>))</span>
+<span id="cb35-14"><a href="#cb35-14" tabindex="-1"></a>y.trn[vv,<span class="st">&quot;X1&quot;</span>] <span class="ot">&lt;-</span> <span class="cn">NA</span></span>
+<span id="cb35-15"><a href="#cb35-15" tabindex="-1"></a><span class="fu">head</span>(y.trn)</span></code></pre></div>
+<pre><code>##              X1          X2          X3         X4   id
+## 775   1.6716295 -1.72746986 -1.89028479  0.0509159  775
+## 2166 -0.2527028  0.40952243  0.30938553 -1.7387588 2166
+## 2167         NA -0.64862633 -0.79955921 -1.0535691 2167
+## 2465  0.7854395  0.09394919  0.57046773  0.5517574 2465
+## 3881  0.9983176 -0.28248062  1.61868192 -0.1142848 3881
+## 3889  2.3360969  0.62647587  0.07353311  0.7195856 3889</code></pre>
+<div class="sourceCode" id="cb37"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" tabindex="-1"></a><span class="do">## GBLUP</span></span>
+<span id="cb37-2"><a href="#cb37-2" tabindex="-1"></a>ans <span class="ot">&lt;-</span> <span class="fu">mmer</span>(X1<span class="sc">~</span><span class="dv">1</span>,</span>
+<span id="cb37-3"><a href="#cb37-3" tabindex="-1"></a>            <span class="at">random=</span><span class="sc">~</span><span class="fu">vsr</span>(id,<span class="at">Gu=</span>K), </span>
+<span id="cb37-4"><a href="#cb37-4" tabindex="-1"></a>            <span class="at">rcov=</span><span class="sc">~</span>units,<span class="at">nIters=</span><span class="dv">3</span>,</span>
+<span id="cb37-5"><a href="#cb37-5" tabindex="-1"></a>            <span class="at">data=</span>y.trn, <span class="at">verbose =</span> <span class="cn">FALSE</span>) <span class="co"># kinship based</span></span>
+<span id="cb37-6"><a href="#cb37-6" tabindex="-1"></a>ans<span class="sc">$</span>U<span class="sc">$</span><span class="st">`</span><span class="at">u:id</span><span class="st">`</span><span class="sc">$</span>X1 <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(ans<span class="sc">$</span>U<span class="sc">$</span><span class="st">`</span><span class="at">u:id</span><span class="st">`</span><span class="sc">$</span>X1)</span>
+<span id="cb37-7"><a href="#cb37-7" tabindex="-1"></a><span class="fu">rownames</span>(ans<span class="sc">$</span>U<span class="sc">$</span><span class="st">`</span><span class="at">u:id</span><span class="st">`</span><span class="sc">$</span>X1) <span class="ot">&lt;-</span> <span class="fu">gsub</span>(<span class="st">&quot;id&quot;</span>,<span class="st">&quot;&quot;</span>,<span class="fu">rownames</span>(ans<span class="sc">$</span>U<span class="sc">$</span><span class="st">`</span><span class="at">u:id</span><span class="st">`</span><span class="sc">$</span>X1))</span>
+<span id="cb37-8"><a href="#cb37-8" tabindex="-1"></a><span class="fu">cor</span>(ans<span class="sc">$</span>U<span class="sc">$</span><span class="st">`</span><span class="at">u:id</span><span class="st">`</span><span class="sc">$</span>X1[vv,],DT[vv,<span class="st">&quot;X1&quot;</span>], <span class="at">use=</span><span class="st">&quot;complete&quot;</span>)</span></code></pre></div>
+<pre><code>## [1] 0.4310372</code></pre>
+<div class="sourceCode" id="cb39"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" tabindex="-1"></a><span class="do">## rrBLUP</span></span>
+<span id="cb39-2"><a href="#cb39-2" tabindex="-1"></a>ans2 <span class="ot">&lt;-</span> <span class="fu">mmer</span>(X1<span class="sc">~</span><span class="dv">1</span>,</span>
+<span id="cb39-3"><a href="#cb39-3" tabindex="-1"></a>             <span class="at">random=</span><span class="sc">~</span><span class="fu">vsr</span>(<span class="fu">list</span>(GT), <span class="at">buildGu =</span> <span class="cn">FALSE</span>), </span>
+<span id="cb39-4"><a href="#cb39-4" tabindex="-1"></a>             <span class="at">rcov=</span><span class="sc">~</span>units, <span class="at">getPEV =</span> <span class="cn">FALSE</span>, <span class="at">nIters=</span><span class="dv">3</span>,</span>
+<span id="cb39-5"><a href="#cb39-5" tabindex="-1"></a>             <span class="at">data=</span>y.trn, <span class="at">verbose =</span> <span class="cn">FALSE</span>) <span class="co"># kinship based</span></span>
+<span id="cb39-6"><a href="#cb39-6" tabindex="-1"></a></span>
+<span id="cb39-7"><a href="#cb39-7" tabindex="-1"></a>u <span class="ot">&lt;-</span> GT <span class="sc">%*%</span> <span class="fu">as.matrix</span>(ans2<span class="sc">$</span>U<span class="sc">$</span><span class="st">`</span><span class="at">u:GT</span><span class="st">`</span><span class="sc">$</span>X1) <span class="co"># BLUPs for individuals</span></span>
+<span id="cb39-8"><a href="#cb39-8" tabindex="-1"></a><span class="fu">rownames</span>(u) <span class="ot">&lt;-</span> <span class="fu">rownames</span>(GT)</span>
+<span id="cb39-9"><a href="#cb39-9" tabindex="-1"></a><span class="fu">cor</span>(u[vv,],DT[vv,<span class="st">&quot;X1&quot;</span>]) <span class="co"># same correlation</span></span></code></pre></div>
+<pre><code>## [1] 0.4370181</code></pre>
+<div class="sourceCode" id="cb41"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" tabindex="-1"></a><span class="co"># the same can be applied in multi-response models in GBLUP or rrBLUP</span></span></code></pre></div>
+<p>Please notice that when specifying the marker matrix as a random
+effect we used the argument ‘buildGu=FALSE’ to inform the ‘mmer’
+function that a covariance matrix for the levels of the random effect
+shouldn’t be built. Imagine a model with 100,000 markers, that would
+imply a relationship matrix of 100,000 x 100,000. If that matrix is a
+diagonal it would only compromise the speed and memory of the function.
+By setting ‘buildGu=FALSE’ the mmer solver will avoid the matrix
+multiplications using that huge diagonal matrix. If you want to specify
+a relationship matrix for the marker matrix then you cannot use that
+‘buildGu’ argument.</p>
+</div>
+<div id="indirect-genetic-effects" class="section level3">
+<h3>6) Indirect genetic effects</h3>
+<p>General variance structures can be used to fit indirect genetic
+effects. Here, we use an example dataset to show how we can fit the
+variance and covariance components between two or more different random
+effects.</p>
+<p>We first fit a direct genetic effects model:</p>
+<div class="sourceCode" id="cb42"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" tabindex="-1"></a><span class="co"># data(DT_ige)</span></span>
+<span id="cb42-2"><a href="#cb42-2" tabindex="-1"></a><span class="co"># DT &lt;- DT_ige</span></span>
+<span id="cb42-3"><a href="#cb42-3" tabindex="-1"></a><span class="co"># Af &lt;- A_ige</span></span>
+<span id="cb42-4"><a href="#cb42-4" tabindex="-1"></a><span class="co"># An &lt;- A_ige</span></span>
+<span id="cb42-5"><a href="#cb42-5" tabindex="-1"></a></span>
+<span id="cb42-6"><a href="#cb42-6" tabindex="-1"></a><span class="do">## Direct genetic effects model</span></span>
+<span id="cb42-7"><a href="#cb42-7" tabindex="-1"></a><span class="co"># modDGE &lt;- mmec(trait ~ block,</span></span>
+<span id="cb42-8"><a href="#cb42-8" tabindex="-1"></a><span class="co">#                random = ~ focal,</span></span>
+<span id="cb42-9"><a href="#cb42-9" tabindex="-1"></a><span class="co">#                rcov = ~ units, nIters=3,</span></span>
+<span id="cb42-10"><a href="#cb42-10" tabindex="-1"></a><span class="co">#                data = DT, verbose=FALSE)</span></span>
+<span id="cb42-11"><a href="#cb42-11" tabindex="-1"></a><span class="co"># summary(modDGE)$varcomp</span></span></code></pre></div>
+<p>We now fit the indirect genetic effects model without covariance
+between DGE and IGE:</p>
+<div class="sourceCode" id="cb43"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" tabindex="-1"></a><span class="co"># data(DT_ige)</span></span>
+<span id="cb43-2"><a href="#cb43-2" tabindex="-1"></a><span class="co"># DT &lt;- DT_ige</span></span>
+<span id="cb43-3"><a href="#cb43-3" tabindex="-1"></a><span class="co"># A &lt;- A_ige</span></span>
+<span id="cb43-4"><a href="#cb43-4" tabindex="-1"></a><span class="co"># </span></span>
+<span id="cb43-5"><a href="#cb43-5" tabindex="-1"></a><span class="co"># ## Indirect genetic effects model</span></span>
+<span id="cb43-6"><a href="#cb43-6" tabindex="-1"></a><span class="co"># modIGE &lt;- mmec(trait ~ block, dateWarning = FALSE,</span></span>
+<span id="cb43-7"><a href="#cb43-7" tabindex="-1"></a><span class="co">#                random = ~ focal + neighbour, verbose = FALSE,</span></span>
+<span id="cb43-8"><a href="#cb43-8" tabindex="-1"></a><span class="co">#                rcov = ~ units, nIters=100,</span></span>
+<span id="cb43-9"><a href="#cb43-9" tabindex="-1"></a><span class="co">#               data = DT)</span></span>
+<span id="cb43-10"><a href="#cb43-10" tabindex="-1"></a><span class="co"># summary(modIGE)$varcomp</span></span></code></pre></div>
+<p>We now fit the indirect genetic effects model with covariance between
+DGE and IGE for which we will use the <code>gvsr()</code> function:</p>
+<div class="sourceCode" id="cb44"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" tabindex="-1"></a><span class="co"># </span><span class="al">###</span><span class="co"> Indirect genetic effects model</span></span>
+<span id="cb44-2"><a href="#cb44-2" tabindex="-1"></a><span class="co"># modIGE &lt;- mmec(trait ~ block, dateWarning = FALSE,</span></span>
+<span id="cb44-3"><a href="#cb44-3" tabindex="-1"></a><span class="co">#                random = ~ covc( vsc(isc(focal)), vsc(isc(neighbour)) ),</span></span>
+<span id="cb44-4"><a href="#cb44-4" tabindex="-1"></a><span class="co">#                rcov = ~ units, nIters=100, verbose = FALSE,</span></span>
+<span id="cb44-5"><a href="#cb44-5" tabindex="-1"></a><span class="co">#               data = DT)</span></span>
+<span id="cb44-6"><a href="#cb44-6" tabindex="-1"></a><span class="co"># summary(modIGE)$varcomp</span></span></code></pre></div>
+<p>On top of that we can include a relationship matrix for the two
+random effects that are being forced to co-vary</p>
+<div class="sourceCode" id="cb45"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" tabindex="-1"></a><span class="do">### Indirect genetic effects model</span></span>
+<span id="cb45-2"><a href="#cb45-2" tabindex="-1"></a><span class="co"># Ai &lt;- as( solve(A_ige + diag(1e-5, nrow(A_ige),nrow(A_ige) )), Class=&quot;dgCMatrix&quot;)</span></span>
+<span id="cb45-3"><a href="#cb45-3" tabindex="-1"></a><span class="co"># # Indirect genetic effects model with covariance between DGE and IGE using relationship matrices</span></span>
+<span id="cb45-4"><a href="#cb45-4" tabindex="-1"></a><span class="co"># modIGE &lt;- mmec(trait ~ block, dateWarning = FALSE,</span></span>
+<span id="cb45-5"><a href="#cb45-5" tabindex="-1"></a><span class="co">#                random = ~ covc( vsc(isc(focal), Gu=Ai), vsc(isc(neighbour), Gu=Ai) ),</span></span>
+<span id="cb45-6"><a href="#cb45-6" tabindex="-1"></a><span class="co">#                rcov = ~ units, nIters=100, verbose = FALSE,</span></span>
+<span id="cb45-7"><a href="#cb45-7" tabindex="-1"></a><span class="co">#               data = DT)</span></span>
+<span id="cb45-8"><a href="#cb45-8" tabindex="-1"></a><span class="co"># summary(modIGE)$varcomp</span></span></code></pre></div>
+</div>
+<div id="genomic-selection-single-cross-prediction" class="section level3">
+<h3>7) Genomic selection: single cross prediction</h3>
+<p>When doing prediction of single cross performance the phenotype can
+be dissected in three main components, the general combining abilities
+(GCA) and specific combining abilities (SCA). This can be expressed with
+the same model analyzed in the diallel experiment mentioned before:</p>
+<p><br></p>
+<p><span class="math inline">\(y = X\beta + Zu_1 + Zu_2 + Zu_S +
+\epsilon\)</span></p>
+<p><br></p>
+<p>with:</p>
+<p><br></p>
+<p><span class="math inline">\(u_1\)</span> ~ N(0, <span class="math inline">\(K_1\)</span><span class="math inline">\(\sigma^2_u1\)</span>)</p>
+<p><span class="math inline">\(u_2\)</span> ~ N(0, <span class="math inline">\(K_2\)</span><span class="math inline">\(\sigma^2_u2\)</span>)</p>
+<p><span class="math inline">\(u_s\)</span> ~ N(0, <span class="math inline">\(K_3\)</span><span class="math inline">\(\sigma^2_us\)</span>)</p>
+<p><br></p>
+<p>And we can specify the K matrices. The main difference between this
+model and the full and half diallel designs is the fact that this model
+will include variance covariance structures in each of the three random
+effects (GCA1, GCA2 and SCA) to be able to predict the crosses that have
+not ocurred yet. We will use the data published by Technow et al. (2015)
+to show how to do prediction of single crosses.</p>
+<div class="sourceCode" id="cb46"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" tabindex="-1"></a><span class="fu">data</span>(DT_technow)</span>
+<span id="cb46-2"><a href="#cb46-2" tabindex="-1"></a>DT <span class="ot">&lt;-</span> DT_technow</span>
+<span id="cb46-3"><a href="#cb46-3" tabindex="-1"></a>Md <span class="ot">&lt;-</span> (Md_technow<span class="sc">*</span><span class="dv">2</span>) <span class="sc">-</span> <span class="dv">1</span></span>
+<span id="cb46-4"><a href="#cb46-4" tabindex="-1"></a>Mf <span class="ot">&lt;-</span> (Mf_technow<span class="sc">*</span><span class="dv">2</span>) <span class="sc">-</span> <span class="dv">1</span></span>
+<span id="cb46-5"><a href="#cb46-5" tabindex="-1"></a>Ad <span class="ot">&lt;-</span> <span class="fu">A.mat</span>(Md)</span>
+<span id="cb46-6"><a href="#cb46-6" tabindex="-1"></a>Af <span class="ot">&lt;-</span> <span class="fu">A.mat</span>(Mf)</span>
+<span id="cb46-7"><a href="#cb46-7" tabindex="-1"></a>Adi <span class="ot">&lt;-</span> <span class="fu">as</span>(<span class="fu">solve</span>(Ad <span class="sc">+</span> <span class="fu">diag</span>(<span class="fl">1e-4</span>,<span class="fu">ncol</span>(Ad),<span class="fu">ncol</span>(Ad))), <span class="at">Class=</span><span class="st">&quot;dgCMatrix&quot;</span>)</span>
+<span id="cb46-8"><a href="#cb46-8" tabindex="-1"></a>Afi <span class="ot">&lt;-</span> <span class="fu">as</span>(<span class="fu">solve</span>(Af <span class="sc">+</span> <span class="fu">diag</span>(<span class="fl">1e-4</span>,<span class="fu">ncol</span>(Af),<span class="fu">ncol</span>(Af))), <span class="at">Class=</span><span class="st">&quot;dgCMatrix&quot;</span>)</span>
+<span id="cb46-9"><a href="#cb46-9" tabindex="-1"></a><span class="co"># RUN THE PREDICTION MODEL</span></span>
+<span id="cb46-10"><a href="#cb46-10" tabindex="-1"></a>y.trn <span class="ot">&lt;-</span> DT</span>
+<span id="cb46-11"><a href="#cb46-11" tabindex="-1"></a>vv1 <span class="ot">&lt;-</span> <span class="fu">which</span>(<span class="sc">!</span><span class="fu">is.na</span>(DT<span class="sc">$</span>GY))</span>
+<span id="cb46-12"><a href="#cb46-12" tabindex="-1"></a>vv2 <span class="ot">&lt;-</span> <span class="fu">sample</span>(vv1, <span class="dv">100</span>)</span>
+<span id="cb46-13"><a href="#cb46-13" tabindex="-1"></a>y.trn[vv2,<span class="st">&quot;GY&quot;</span>] <span class="ot">&lt;-</span> <span class="cn">NA</span></span>
+<span id="cb46-14"><a href="#cb46-14" tabindex="-1"></a>anss2 <span class="ot">&lt;-</span> <span class="fu">mmec</span>(GY<span class="sc">~</span><span class="dv">1</span>, </span>
+<span id="cb46-15"><a href="#cb46-15" tabindex="-1"></a>              <span class="at">random=</span><span class="sc">~</span><span class="fu">vsc</span>(<span class="fu">isc</span>(dent),<span class="at">Gu=</span>Adi) <span class="sc">+</span> <span class="fu">vsc</span>(<span class="fu">isc</span>(flint),<span class="at">Gu=</span>Afi), </span>
+<span id="cb46-16"><a href="#cb46-16" tabindex="-1"></a>              <span class="at">rcov=</span><span class="sc">~</span>units, <span class="at">nIters=</span><span class="dv">15</span>,</span>
+<span id="cb46-17"><a href="#cb46-17" tabindex="-1"></a>              <span class="at">data=</span>y.trn, <span class="at">verbose =</span> <span class="cn">FALSE</span>) </span>
+<span id="cb46-18"><a href="#cb46-18" tabindex="-1"></a><span class="fu">summary</span>(anss2)<span class="sc">$</span>varcomp</span></code></pre></div>
+<pre><code>##                    VarComp VarCompSE   Zratio Constraint
+## dent:Adi:isc:isc  15.86817  2.992973 5.301809   Positive
+## flint:Afi:isc:isc 11.29153  3.280194 3.442337   Positive
+## units:isc:isc     15.97828  2.831564 5.642916   Positive</code></pre>
+<div class="sourceCode" id="cb48"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1" tabindex="-1"></a><span class="co"># zu1 &lt;- model.matrix(~dent-1,y.trn) %*% anss2$uList$`vsc(isc(dent), Gu = Adi)`</span></span>
+<span id="cb48-2"><a href="#cb48-2" tabindex="-1"></a><span class="co"># zu2 &lt;- model.matrix(~flint-1,y.trn) %*% anss2$uList$`vsc(isc(flint), Gu = Afi)`</span></span>
+<span id="cb48-3"><a href="#cb48-3" tabindex="-1"></a><span class="co"># u &lt;- zu1+zu2+as.vector(anss2$b)</span></span>
+<span id="cb48-4"><a href="#cb48-4" tabindex="-1"></a><span class="co"># cor(u[vv2,], DT$GY[vv2])</span></span></code></pre></div>
+<p>In the previous model we only used the GCA effects (GCA1 and GCA2)
+for practicity, altough it’s been shown that the SCA effect doesn’t
+actually help that much in increasing prediction accuracy, but does
+increase a lot the computation intensity required since the variance
+covariance matrix for SCA is the kronecker product of the variance
+covariance matrices for the GCA effects, resulting in a 10578 x 10578
+matrix that increases in a very intensive manner the computation
+required.</p>
+<p>A model without covariance structures would show that the SCA
+variance component is insignificant compared to the GCA effects. This is
+why including the third random effect doesn’t increase the prediction
+accuracy.</p>
+</div>
+<div id="spatial-modeling-using-the-2-dimensional-spline" class="section level3">
+<h3>8) Spatial modeling: using the 2-dimensional spline</h3>
+<p>We will use the CPdata to show the use of 2-dimensional splines for
+accomodating spatial effects in field experiments. In early generation
+variety trials the availability of seed is low, which makes the use of
+unreplicated designs a neccesity more than anything else. Experimental
+designs such as augmented designs and partially-replicated (p-rep)
+designs are becoming ever more common these days.</p>
+<p>In order to do a good job modeling the spatial trends happening in
+the field, special covariance structures have been proposed to
+accomodate such spatial trends (i.e. autoregressive residuals; ar1).
+Unfortunately, some of these covariance structures make the modeling
+rather unstable. More recently, other research groups have proposed the
+use of 2-dimensional splines to overcome such issues and have a more
+robust modeling of the spatial terms (Lee et al. 2013; Rodríguez-Álvarez
+et al. 2018).</p>
+<p>In this example we assume an unreplicated population where row and
+range information is available which allows us to fit a 2 dimensional
+spline model.</p>
+<div class="sourceCode" id="cb49"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" tabindex="-1"></a><span class="fu">data</span>(DT_cpdata)</span>
+<span id="cb49-2"><a href="#cb49-2" tabindex="-1"></a>DT <span class="ot">&lt;-</span> DT_cpdata</span>
+<span id="cb49-3"><a href="#cb49-3" tabindex="-1"></a>GT <span class="ot">&lt;-</span> GT_cpdata</span>
+<span id="cb49-4"><a href="#cb49-4" tabindex="-1"></a>MP <span class="ot">&lt;-</span> MP_cpdata</span>
+<span id="cb49-5"><a href="#cb49-5" tabindex="-1"></a><span class="do">### mimic two fields</span></span>
+<span id="cb49-6"><a href="#cb49-6" tabindex="-1"></a>A <span class="ot">&lt;-</span> <span class="fu">A.mat</span>(GT)</span>
+<span id="cb49-7"><a href="#cb49-7" tabindex="-1"></a>mix <span class="ot">&lt;-</span> <span class="fu">mmer</span>(Yield<span class="sc">~</span><span class="dv">1</span>,</span>
+<span id="cb49-8"><a href="#cb49-8" tabindex="-1"></a>            <span class="at">random=</span><span class="sc">~</span><span class="fu">vsr</span>(id, <span class="at">Gu=</span>A) <span class="sc">+</span></span>
+<span id="cb49-9"><a href="#cb49-9" tabindex="-1"></a>              <span class="fu">vsr</span>(Rowf) <span class="sc">+</span></span>
+<span id="cb49-10"><a href="#cb49-10" tabindex="-1"></a>              <span class="fu">vsr</span>(Colf) <span class="sc">+</span></span>
+<span id="cb49-11"><a href="#cb49-11" tabindex="-1"></a>              <span class="fu">spl2Da</span>(Row,Col), <span class="at">nIters=</span><span class="dv">3</span>,</span>
+<span id="cb49-12"><a href="#cb49-12" tabindex="-1"></a>            <span class="at">rcov=</span><span class="sc">~</span><span class="fu">vsr</span>(units),</span>
+<span id="cb49-13"><a href="#cb49-13" tabindex="-1"></a>            <span class="at">data=</span>DT, <span class="at">verbose =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb49-14"><a href="#cb49-14" tabindex="-1"></a><span class="fu">summary</span>(mix)</span></code></pre></div>
+<pre><code>## ============================================================
+##          Multivariate Linear Mixed Model fit by REML         
+## **********************  sommer 4.3  ********************** 
+## ============================================================
+##          logLik      AIC     BIC Method Converge
+## Value -151.2647 304.5293 308.421     NR    FALSE
+## ============================================================
+## Variance-Covariance components:
+##                     VarComp VarCompSE Zratio Constraint
+## u:id.Yield-Yield      792.6     317.6 2.4959   Positive
+## u:Rowf.Yield-Yield    807.6     371.3 2.1750   Positive
+## u:Colf.Yield-Yield    183.2     139.7 1.3121   Positive
+## A:all.Yield-Yield     515.8     701.3 0.7354   Positive
+## u:units.Yield-Yield  2918.4     292.8 9.9667   Positive
+## ============================================================
+## Fixed effects:
+##   Trait      Effect Estimate Std.Error t.value
+## 1 Yield (Intercept)    132.1     8.761   15.08
+## ============================================================
+## Groups and observations:
+##        Yield
+## u:id     363
+## u:Rowf    13
+## u:Colf    36
+## A:all    168
+## ============================================================
+## Use the &#39;$&#39; sign to access results and parameters</code></pre>
+<div class="sourceCode" id="cb51"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1" tabindex="-1"></a><span class="co"># make a plot to observe the spatial effects found by the spl2D()</span></span>
+<span id="cb51-2"><a href="#cb51-2" tabindex="-1"></a>W <span class="ot">&lt;-</span> <span class="fu">with</span>(DT,<span class="fu">spl2Da</span>(Row,Col)) <span class="co"># 2D spline incidence matrix</span></span>
+<span id="cb51-3"><a href="#cb51-3" tabindex="-1"></a>DT<span class="sc">$</span>spatial <span class="ot">&lt;-</span> W<span class="sc">$</span>Z<span class="sc">$</span><span class="st">`</span><span class="at">A:all</span><span class="st">`</span><span class="sc">%*%</span>mix<span class="sc">$</span>U<span class="sc">$</span><span class="st">`</span><span class="at">A:all</span><span class="st">`</span><span class="sc">$</span>Yield <span class="co"># 2D spline BLUPs</span></span>
+<span id="cb51-4"><a href="#cb51-4" tabindex="-1"></a><span class="co"># lattice::levelplot(spatial~Row*Col, data=DT) # plot the spatial effect by row and column</span></span></code></pre></div>
+<p>Notice that the job is done by the <code>spl2Da()</code> function
+that takes the <code>Row</code> and <code>Col</code> information to fit
+a spatial kernel.</p>
+</div>
+<div id="multivariate-genetic-models-and-genetic-correlations" class="section level3">
+<h3>9) Multivariate genetic models and genetic correlations</h3>
+<p>Sometimes is important to estimate genetic variance-covariance among
+traits–multi-reponse models are very useful for such a task. Let see an
+example with 3 traits (<code>color</code>, <code>Yield</code>, and
+<code>Firmness</code>) and a single random effect (genotype;
+<code>id</code>) although multiple effects can be modeled as well. We
+need to use a variance covariance structure for the random effect to be
+able to obtain the genetic covariance among traits.</p>
+<div class="sourceCode" id="cb52"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1" tabindex="-1"></a><span class="co"># data(DT_cpdata)</span></span>
+<span id="cb52-2"><a href="#cb52-2" tabindex="-1"></a><span class="co"># DT &lt;- DT_cpdata</span></span>
+<span id="cb52-3"><a href="#cb52-3" tabindex="-1"></a><span class="co"># GT &lt;- GT_cpdata</span></span>
+<span id="cb52-4"><a href="#cb52-4" tabindex="-1"></a><span class="co"># MP &lt;- MP_cpdata</span></span>
+<span id="cb52-5"><a href="#cb52-5" tabindex="-1"></a><span class="co"># A &lt;- A.mat(GT)</span></span>
+<span id="cb52-6"><a href="#cb52-6" tabindex="-1"></a><span class="co"># ans.m &lt;- mmer(cbind(Yield,color)~1,</span></span>
+<span id="cb52-7"><a href="#cb52-7" tabindex="-1"></a><span class="co">#                random=~ vsr(id, Gu=A, Gtc=unsm(2))</span></span>
+<span id="cb52-8"><a href="#cb52-8" tabindex="-1"></a><span class="co">#                + vsr(Rowf,Gtc=diag(2))</span></span>
+<span id="cb52-9"><a href="#cb52-9" tabindex="-1"></a><span class="co">#                + vsr(Colf,Gtc=diag(2)),</span></span>
+<span id="cb52-10"><a href="#cb52-10" tabindex="-1"></a><span class="co">#                rcov=~ vsr(units, Gtc=unsm(2)), nIters=3,</span></span>
+<span id="cb52-11"><a href="#cb52-11" tabindex="-1"></a><span class="co">#                data=DT, verbose = FALSE)</span></span></code></pre></div>
+<p>Now you can extract the BLUPs using <code>randef(ans.m)</code> or
+simply <code>ans.m$U</code>. Also, genetic correlations and
+heritabilities can be calculated easily.</p>
+<div class="sourceCode" id="cb53"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb53-1"><a href="#cb53-1" tabindex="-1"></a><span class="co"># cov2cor(ans.m$sigma$`u:id`)</span></span></code></pre></div>
+</div>
+</div>
+<div id="section-3-special-topics-in-quantitative-genetics" class="section level2">
+<h2>SECTION 3: Special topics in Quantitative genetics</h2>
+<div id="partitioned-model" class="section level3">
+<h3>1) Partitioned model</h3>
+<p>The partitioned model was popularized by () to show that marker
+effects can be obtained by fitting a GBLUP model to reduce the
+computational burden and then recover them by creating some special
+matrices MM’ for GBLUP and M’(M’M)- to recover marker effects. Here we
+show a very easy example using the DT_cpdata:</p>
+<div class="sourceCode" id="cb54"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb54-1"><a href="#cb54-1" tabindex="-1"></a><span class="fu">library</span>(sommer)</span>
+<span id="cb54-2"><a href="#cb54-2" tabindex="-1"></a><span class="fu">data</span>(<span class="st">&quot;DT_cpdata&quot;</span>)</span>
+<span id="cb54-3"><a href="#cb54-3" tabindex="-1"></a>DT <span class="ot">&lt;-</span> DT_cpdata</span>
+<span id="cb54-4"><a href="#cb54-4" tabindex="-1"></a>M <span class="ot">&lt;-</span> GT_cpdata</span>
+<span id="cb54-5"><a href="#cb54-5" tabindex="-1"></a></span>
+<span id="cb54-6"><a href="#cb54-6" tabindex="-1"></a><span class="do">################</span></span>
+<span id="cb54-7"><a href="#cb54-7" tabindex="-1"></a><span class="co"># MARKER MODEL</span></span>
+<span id="cb54-8"><a href="#cb54-8" tabindex="-1"></a><span class="do">################</span></span>
+<span id="cb54-9"><a href="#cb54-9" tabindex="-1"></a>mix.marker <span class="ot">&lt;-</span> <span class="fu">mmer</span>(color<span class="sc">~</span><span class="dv">1</span>,</span>
+<span id="cb54-10"><a href="#cb54-10" tabindex="-1"></a>                   <span class="at">random=</span><span class="sc">~</span>Rowf<span class="sc">+</span><span class="fu">vsr</span>(M),</span>
+<span id="cb54-11"><a href="#cb54-11" tabindex="-1"></a>                   <span class="at">rcov=</span><span class="sc">~</span>units,<span class="at">data=</span>DT, </span>
+<span id="cb54-12"><a href="#cb54-12" tabindex="-1"></a>                   <span class="at">verbose =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb54-13"><a href="#cb54-13" tabindex="-1"></a></span>
+<span id="cb54-14"><a href="#cb54-14" tabindex="-1"></a></span>
+<span id="cb54-15"><a href="#cb54-15" tabindex="-1"></a>me.marker <span class="ot">&lt;-</span> mix.marker<span class="sc">$</span>U<span class="sc">$</span><span class="st">`</span><span class="at">u:M</span><span class="st">`</span><span class="sc">$</span>color</span>
+<span id="cb54-16"><a href="#cb54-16" tabindex="-1"></a></span>
+<span id="cb54-17"><a href="#cb54-17" tabindex="-1"></a><span class="do">################</span></span>
+<span id="cb54-18"><a href="#cb54-18" tabindex="-1"></a><span class="co"># PARTITIONED GBLUP MODEL</span></span>
+<span id="cb54-19"><a href="#cb54-19" tabindex="-1"></a><span class="do">################</span></span>
+<span id="cb54-20"><a href="#cb54-20" tabindex="-1"></a></span>
+<span id="cb54-21"><a href="#cb54-21" tabindex="-1"></a>MMT <span class="ot">&lt;-</span><span class="fu">tcrossprod</span>(M) <span class="do">## MM&#39; = additive relationship matrix </span></span>
+<span id="cb54-22"><a href="#cb54-22" tabindex="-1"></a>MMTinv<span class="ot">&lt;-</span><span class="fu">solve</span>(MMT) <span class="do">## inverse</span></span>
+<span id="cb54-23"><a href="#cb54-23" tabindex="-1"></a>MTMMTinv<span class="ot">&lt;-</span><span class="fu">t</span>(M)<span class="sc">%*%</span>MMTinv <span class="co"># M&#39; %*% (M&#39;M)-</span></span>
+<span id="cb54-24"><a href="#cb54-24" tabindex="-1"></a></span>
+<span id="cb54-25"><a href="#cb54-25" tabindex="-1"></a>mix.part <span class="ot">&lt;-</span> <span class="fu">mmer</span>(color<span class="sc">~</span><span class="dv">1</span>,</span>
+<span id="cb54-26"><a href="#cb54-26" tabindex="-1"></a>                 <span class="at">random=</span><span class="sc">~</span>Rowf<span class="sc">+</span><span class="fu">vsr</span>(id, <span class="at">Gu=</span>MMT),</span>
+<span id="cb54-27"><a href="#cb54-27" tabindex="-1"></a>                 <span class="at">rcov=</span><span class="sc">~</span>units,<span class="at">data=</span>DT,</span>
+<span id="cb54-28"><a href="#cb54-28" tabindex="-1"></a>                 <span class="at">verbose =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb54-29"><a href="#cb54-29" tabindex="-1"></a></span>
+<span id="cb54-30"><a href="#cb54-30" tabindex="-1"></a><span class="co">#convert BLUPs to marker effects me=M&#39;(M&#39;M)- u</span></span>
+<span id="cb54-31"><a href="#cb54-31" tabindex="-1"></a>me.part<span class="ot">&lt;-</span>MTMMTinv<span class="sc">%*%</span><span class="fu">matrix</span>(mix.part<span class="sc">$</span>U<span class="sc">$</span><span class="st">`</span><span class="at">u:id</span><span class="st">`</span><span class="sc">$</span>color,<span class="at">ncol=</span><span class="dv">1</span>)</span>
+<span id="cb54-32"><a href="#cb54-32" tabindex="-1"></a></span>
+<span id="cb54-33"><a href="#cb54-33" tabindex="-1"></a><span class="co"># compare marker effects between both models</span></span>
+<span id="cb54-34"><a href="#cb54-34" tabindex="-1"></a><span class="fu">plot</span>(me.marker,me.part)</span></code></pre></div>
+<p><img role="img" src="data:image/png;base64,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" /><!-- --></p>
+<p>As can be seen, these two models are equivalent with the exception
+that the partitioned model is more computationally efficient.</p>
+</div>
+<div id="udu-decomposition" class="section level3">
+<h3>2) UDU’ decomposition</h3>
+<p>Lee and Van der Warf (2015) proposed a decomposition of the
+relationship matrix A=UDU’ together with a transformation of the
+response and fixed effects Uy = Ux + UZ + e, to fit a model where the
+phenotypic variance matrix V is a diagonal because the relationship
+matrix is the diagonal matrix D from the decomposition that can be
+inverted easily and make multitrait models more feasible.</p>
+<div class="sourceCode" id="cb55"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb55-1"><a href="#cb55-1" tabindex="-1"></a><span class="co"># data(&quot;DT_wheat&quot;)</span></span>
+<span id="cb55-2"><a href="#cb55-2" tabindex="-1"></a><span class="co"># rownames(GT_wheat) &lt;- rownames(DT_wheat)</span></span>
+<span id="cb55-3"><a href="#cb55-3" tabindex="-1"></a><span class="co"># G &lt;- A.mat(GT_wheat)</span></span>
+<span id="cb55-4"><a href="#cb55-4" tabindex="-1"></a><span class="co"># Y &lt;- data.frame(DT_wheat)</span></span>
+<span id="cb55-5"><a href="#cb55-5" tabindex="-1"></a><span class="co"># </span></span>
+<span id="cb55-6"><a href="#cb55-6" tabindex="-1"></a><span class="co"># # make the decomposition</span></span>
+<span id="cb55-7"><a href="#cb55-7" tabindex="-1"></a><span class="co"># UD&lt;-eigen(G) # get the decomposition: G = UDU&#39;</span></span>
+<span id="cb55-8"><a href="#cb55-8" tabindex="-1"></a><span class="co"># U&lt;-UD$vectors</span></span>
+<span id="cb55-9"><a href="#cb55-9" tabindex="-1"></a><span class="co"># D&lt;-diag(UD$values)# This will be our new &#39;relationship-matrix&#39;</span></span>
+<span id="cb55-10"><a href="#cb55-10" tabindex="-1"></a><span class="co"># rownames(D) &lt;- colnames(D) &lt;- rownames(G)</span></span>
+<span id="cb55-11"><a href="#cb55-11" tabindex="-1"></a><span class="co"># X&lt;-model.matrix(~1, data=Y) # here: only one fixed effect (intercept)</span></span>
+<span id="cb55-12"><a href="#cb55-12" tabindex="-1"></a><span class="co"># UX&lt;-t(U)%*%X # premultiply X and y by U&#39; </span></span>
+<span id="cb55-13"><a href="#cb55-13" tabindex="-1"></a><span class="co"># UY &lt;- t(U) %*% as.matrix(Y) # multivariate</span></span>
+<span id="cb55-14"><a href="#cb55-14" tabindex="-1"></a><span class="co"># </span></span>
+<span id="cb55-15"><a href="#cb55-15" tabindex="-1"></a><span class="co"># # dataset for decomposed model</span></span>
+<span id="cb55-16"><a href="#cb55-16" tabindex="-1"></a><span class="co"># DTd&lt;-data.frame(id = rownames(G) ,UY, UX =UX[,1])</span></span>
+<span id="cb55-17"><a href="#cb55-17" tabindex="-1"></a><span class="co"># DTd$id&lt;-as.character(DTd$id)</span></span>
+<span id="cb55-18"><a href="#cb55-18" tabindex="-1"></a><span class="co"># </span></span>
+<span id="cb55-19"><a href="#cb55-19" tabindex="-1"></a><span class="co"># modeld &lt;- mmer(cbind(X1,X2) ~ UX - 1, </span></span>
+<span id="cb55-20"><a href="#cb55-20" tabindex="-1"></a><span class="co">#               random = ~vsr(id,Gu=D), </span></span>
+<span id="cb55-21"><a href="#cb55-21" tabindex="-1"></a><span class="co">#               rcov = ~vsr(units),</span></span>
+<span id="cb55-22"><a href="#cb55-22" tabindex="-1"></a><span class="co">#               data=DTd, verbose = FALSE)</span></span>
+<span id="cb55-23"><a href="#cb55-23" tabindex="-1"></a><span class="co"># </span></span>
+<span id="cb55-24"><a href="#cb55-24" tabindex="-1"></a><span class="co"># # dataset for normal model</span></span>
+<span id="cb55-25"><a href="#cb55-25" tabindex="-1"></a><span class="co"># DTn&lt;-data.frame(id = rownames(G) , DT_wheat)</span></span>
+<span id="cb55-26"><a href="#cb55-26" tabindex="-1"></a><span class="co"># DTn$id&lt;-as.character(DTn$id)</span></span>
+<span id="cb55-27"><a href="#cb55-27" tabindex="-1"></a><span class="co"># </span></span>
+<span id="cb55-28"><a href="#cb55-28" tabindex="-1"></a><span class="co"># modeln &lt;- mmer(cbind(X1,X2) ~ 1, </span></span>
+<span id="cb55-29"><a href="#cb55-29" tabindex="-1"></a><span class="co">#               random = ~vsr(id,Gu=G), </span></span>
+<span id="cb55-30"><a href="#cb55-30" tabindex="-1"></a><span class="co">#               rcov = ~vsr(units),</span></span>
+<span id="cb55-31"><a href="#cb55-31" tabindex="-1"></a><span class="co">#               data=DTn, verbose = FALSE)</span></span>
+<span id="cb55-32"><a href="#cb55-32" tabindex="-1"></a><span class="co"># </span></span>
+<span id="cb55-33"><a href="#cb55-33" tabindex="-1"></a><span class="co"># ## compare regular and transformed blups</span></span>
+<span id="cb55-34"><a href="#cb55-34" tabindex="-1"></a><span class="co"># plot(x=(solve(t(U)))%*%modeld$U$`u:id`$X2[colnames(D)], </span></span>
+<span id="cb55-35"><a href="#cb55-35" tabindex="-1"></a><span class="co">#      y=modeln$U$`u:id`$X2[colnames(D)], xlab=&quot;UDU blup&quot;,</span></span>
+<span id="cb55-36"><a href="#cb55-36" tabindex="-1"></a><span class="co">#      ylab=&quot;blup&quot;)</span></span></code></pre></div>
+<p>As can be seen, the two models are equivalent. Despite the fact that
+sommer doesn’t take a great advantage of this trick because it was built
+for dense matrices using the Armadillo library. Other software may be
+better using this trick.</p>
+</div>
+<div id="mating-designs" class="section level3">
+<h3>3) Mating designs</h3>
+<p>Estimating variance components has been a topic of interest for the
+breeding community for a long time. Here we show how to calculate
+additive and dominance variance using the North Carolina Design I
+(Nested design) and North Carolina Design II (Factorial design) using
+the classical Expected Mean Squares method and the REML methods from
+sommer and how these two are equivalent.</p>
+<div id="north-carolina-design-i-nested-design" class="section level4">
+<h4>North Carolina Design I (Nested design)</h4>
+<div class="sourceCode" id="cb56"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb56-1"><a href="#cb56-1" tabindex="-1"></a><span class="fu">data</span>(DT_expdesigns)</span>
+<span id="cb56-2"><a href="#cb56-2" tabindex="-1"></a>DT <span class="ot">&lt;-</span> DT_expdesigns<span class="sc">$</span>car1</span>
+<span id="cb56-3"><a href="#cb56-3" tabindex="-1"></a>DT <span class="ot">&lt;-</span> <span class="fu">aggregate</span>(yield<span class="sc">~</span>set<span class="sc">+</span>male<span class="sc">+</span>female<span class="sc">+</span>rep, <span class="at">data=</span>DT, <span class="at">FUN =</span> mean)</span>
+<span id="cb56-4"><a href="#cb56-4" tabindex="-1"></a>DT<span class="sc">$</span>setf <span class="ot">&lt;-</span> <span class="fu">as.factor</span>(DT<span class="sc">$</span>set)</span>
+<span id="cb56-5"><a href="#cb56-5" tabindex="-1"></a>DT<span class="sc">$</span>repf <span class="ot">&lt;-</span> <span class="fu">as.factor</span>(DT<span class="sc">$</span>rep)</span>
+<span id="cb56-6"><a href="#cb56-6" tabindex="-1"></a>DT<span class="sc">$</span>malef <span class="ot">&lt;-</span> <span class="fu">as.factor</span>(DT<span class="sc">$</span>male)</span>
+<span id="cb56-7"><a href="#cb56-7" tabindex="-1"></a>DT<span class="sc">$</span>femalef <span class="ot">&lt;-</span> <span class="fu">as.factor</span>(DT<span class="sc">$</span>female)</span>
+<span id="cb56-8"><a href="#cb56-8" tabindex="-1"></a><span class="co">#levelplot(yield~male*female|set, data=DT, main=&quot;NC design I&quot;)</span></span>
+<span id="cb56-9"><a href="#cb56-9" tabindex="-1"></a><span class="do">##############################</span></span>
+<span id="cb56-10"><a href="#cb56-10" tabindex="-1"></a><span class="do">## Expected Mean Square method</span></span>
+<span id="cb56-11"><a href="#cb56-11" tabindex="-1"></a><span class="do">##############################</span></span>
+<span id="cb56-12"><a href="#cb56-12" tabindex="-1"></a>mix1 <span class="ot">&lt;-</span> <span class="fu">lm</span>(yield<span class="sc">~</span> setf <span class="sc">+</span> setf<span class="sc">:</span>repf <span class="sc">+</span> femalef<span class="sc">:</span>malef<span class="sc">:</span>setf <span class="sc">+</span> malef<span class="sc">:</span>setf, <span class="at">data=</span>DT)</span>
+<span id="cb56-13"><a href="#cb56-13" tabindex="-1"></a>MS <span class="ot">&lt;-</span> <span class="fu">anova</span>(mix1); MS</span></code></pre></div>
+<pre><code>## Analysis of Variance Table
+## 
+## Response: yield
+##                    Df Sum Sq Mean Sq F value   Pr(&gt;F)    
+## setf                1 0.1780 0.17796  1.6646 0.226012    
+## setf:repf           2 0.9965 0.49824  4.6605 0.037141 *  
+## setf:malef          4 7.3904 1.84759 17.2822 0.000173 ***
+## setf:femalef:malef  6 1.6083 0.26806  2.5074 0.095575 .  
+## Residuals          10 1.0691 0.10691                     
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+<div class="sourceCode" id="cb58"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb58-1"><a href="#cb58-1" tabindex="-1"></a>ms1 <span class="ot">&lt;-</span> MS[<span class="st">&quot;setf:malef&quot;</span>,<span class="st">&quot;Mean Sq&quot;</span>]</span>
+<span id="cb58-2"><a href="#cb58-2" tabindex="-1"></a>ms2 <span class="ot">&lt;-</span> MS[<span class="st">&quot;setf:femalef:malef&quot;</span>,<span class="st">&quot;Mean Sq&quot;</span>]</span>
+<span id="cb58-3"><a href="#cb58-3" tabindex="-1"></a>mse <span class="ot">&lt;-</span> MS[<span class="st">&quot;Residuals&quot;</span>,<span class="st">&quot;Mean Sq&quot;</span>]</span>
+<span id="cb58-4"><a href="#cb58-4" tabindex="-1"></a>nrep<span class="ot">=</span><span class="dv">2</span></span>
+<span id="cb58-5"><a href="#cb58-5" tabindex="-1"></a>nfem<span class="ot">=</span><span class="dv">2</span></span>
+<span id="cb58-6"><a href="#cb58-6" tabindex="-1"></a>Vfm <span class="ot">&lt;-</span> (ms2<span class="sc">-</span>mse)<span class="sc">/</span>nrep</span>
+<span id="cb58-7"><a href="#cb58-7" tabindex="-1"></a>Vm <span class="ot">&lt;-</span> (ms1<span class="sc">-</span>ms2)<span class="sc">/</span>(nrep<span class="sc">*</span>nfem)</span>
+<span id="cb58-8"><a href="#cb58-8" tabindex="-1"></a></span>
+<span id="cb58-9"><a href="#cb58-9" tabindex="-1"></a><span class="do">## Calculate Va and Vd</span></span>
+<span id="cb58-10"><a href="#cb58-10" tabindex="-1"></a>Va<span class="ot">=</span><span class="dv">4</span><span class="sc">*</span>Vm <span class="co"># assuming no inbreeding (4/(1+F))</span></span>
+<span id="cb58-11"><a href="#cb58-11" tabindex="-1"></a>Vd<span class="ot">=</span><span class="dv">4</span><span class="sc">*</span>(Vfm<span class="sc">-</span>Vm) <span class="co"># assuming no inbreeding(4/(1+F)^2)</span></span>
+<span id="cb58-12"><a href="#cb58-12" tabindex="-1"></a>Vg<span class="ot">=</span><span class="fu">c</span>(Va,Vd); <span class="fu">names</span>(Vg) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;Va&quot;</span>,<span class="st">&quot;Vd&quot;</span>); Vg</span></code></pre></div>
+<pre><code>##        Va        Vd 
+##  1.579537 -1.257241</code></pre>
+<div class="sourceCode" id="cb60"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb60-1"><a href="#cb60-1" tabindex="-1"></a><span class="do">##############################</span></span>
+<span id="cb60-2"><a href="#cb60-2" tabindex="-1"></a><span class="do">## REML method</span></span>
+<span id="cb60-3"><a href="#cb60-3" tabindex="-1"></a><span class="do">##############################</span></span>
+<span id="cb60-4"><a href="#cb60-4" tabindex="-1"></a>mix2 <span class="ot">&lt;-</span> <span class="fu">mmer</span>(yield<span class="sc">~</span> setf <span class="sc">+</span> setf<span class="sc">:</span>repf,</span>
+<span id="cb60-5"><a href="#cb60-5" tabindex="-1"></a>            <span class="at">random=</span><span class="sc">~</span>femalef<span class="sc">:</span>malef<span class="sc">:</span>setf <span class="sc">+</span> malef<span class="sc">:</span>setf, <span class="at">nIters=</span><span class="dv">3</span>,</span>
+<span id="cb60-6"><a href="#cb60-6" tabindex="-1"></a>            <span class="at">data=</span>DT, <span class="at">verbose =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb60-7"><a href="#cb60-7" tabindex="-1"></a>vc <span class="ot">&lt;-</span> <span class="fu">summary</span>(mix2)<span class="sc">$</span>varcomp; vc</span></code></pre></div>
+<pre><code>##                                  VarComp  VarCompSE   Zratio Constraint
+## femalef:malef:setf.yield-yield 0.0795986 0.07959526 1.000042   Positive
+## malef:setf.yield-yield         0.3875096 0.27561291 1.405992   Positive
+## units.yield-yield              0.1080557 0.05294578 2.040875   Positive</code></pre>
+<div class="sourceCode" id="cb62"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb62-1"><a href="#cb62-1" tabindex="-1"></a>Vfm <span class="ot">&lt;-</span> vc[<span class="dv">1</span>,<span class="st">&quot;VarComp&quot;</span>]</span>
+<span id="cb62-2"><a href="#cb62-2" tabindex="-1"></a>Vm <span class="ot">&lt;-</span> vc[<span class="dv">2</span>,<span class="st">&quot;VarComp&quot;</span>]</span>
+<span id="cb62-3"><a href="#cb62-3" tabindex="-1"></a></span>
+<span id="cb62-4"><a href="#cb62-4" tabindex="-1"></a><span class="do">## Calculate Va and Vd</span></span>
+<span id="cb62-5"><a href="#cb62-5" tabindex="-1"></a>Va<span class="ot">=</span><span class="dv">4</span><span class="sc">*</span>Vm <span class="co"># assuming no inbreeding (4/(1+F))</span></span>
+<span id="cb62-6"><a href="#cb62-6" tabindex="-1"></a>Vd<span class="ot">=</span><span class="dv">4</span><span class="sc">*</span>(Vfm<span class="sc">-</span>Vm) <span class="co"># assuming no inbreeding(4/(1+F)^2)</span></span>
+<span id="cb62-7"><a href="#cb62-7" tabindex="-1"></a>Vg<span class="ot">=</span><span class="fu">c</span>(Va,Vd); <span class="fu">names</span>(Vg) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;Va&quot;</span>,<span class="st">&quot;Vd&quot;</span>); Vg</span></code></pre></div>
+<pre><code>##        Va        Vd 
+##  1.550038 -1.231644</code></pre>
+<p>As can be seen the REML method is easier than manipulating the MS and
+we arrive to the same results.</p>
+</div>
+<div id="north-carolina-design-ii-factorial-design" class="section level4">
+<h4>North Carolina Design II (Factorial design)</h4>
+<div class="sourceCode" id="cb64"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb64-1"><a href="#cb64-1" tabindex="-1"></a>DT <span class="ot">&lt;-</span> DT_expdesigns<span class="sc">$</span>car2</span>
+<span id="cb64-2"><a href="#cb64-2" tabindex="-1"></a>DT <span class="ot">&lt;-</span> <span class="fu">aggregate</span>(yield<span class="sc">~</span>set<span class="sc">+</span>male<span class="sc">+</span>female<span class="sc">+</span>rep, <span class="at">data=</span>DT, <span class="at">FUN =</span> mean)</span>
+<span id="cb64-3"><a href="#cb64-3" tabindex="-1"></a>DT<span class="sc">$</span>setf <span class="ot">&lt;-</span> <span class="fu">as.factor</span>(DT<span class="sc">$</span>set)</span>
+<span id="cb64-4"><a href="#cb64-4" tabindex="-1"></a>DT<span class="sc">$</span>repf <span class="ot">&lt;-</span> <span class="fu">as.factor</span>(DT<span class="sc">$</span>rep)</span>
+<span id="cb64-5"><a href="#cb64-5" tabindex="-1"></a>DT<span class="sc">$</span>malef <span class="ot">&lt;-</span> <span class="fu">as.factor</span>(DT<span class="sc">$</span>male)</span>
+<span id="cb64-6"><a href="#cb64-6" tabindex="-1"></a>DT<span class="sc">$</span>femalef <span class="ot">&lt;-</span> <span class="fu">as.factor</span>(DT<span class="sc">$</span>female)</span>
+<span id="cb64-7"><a href="#cb64-7" tabindex="-1"></a><span class="co">#levelplot(yield~male*female|set, data=DT, main=&quot;NC desing II&quot;)</span></span>
+<span id="cb64-8"><a href="#cb64-8" tabindex="-1"></a><span class="fu">head</span>(DT)</span></code></pre></div>
+<pre><code>##   set male female rep   yield setf repf malef femalef
+## 1   1    1      1   1  831.03    1    1     1       1
+## 2   1    2      1   1 1046.55    1    1     2       1
+## 3   1    3      1   1  853.33    1    1     3       1
+## 4   1    4      1   1  940.00    1    1     4       1
+## 5   1    5      1   1  802.00    1    1     5       1
+## 6   1    1      2   1  625.93    1    1     1       2</code></pre>
+<div class="sourceCode" id="cb66"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb66-1"><a href="#cb66-1" tabindex="-1"></a>N<span class="ot">=</span><span class="fu">with</span>(DT,<span class="fu">table</span>(female, male, set))</span>
+<span id="cb66-2"><a href="#cb66-2" tabindex="-1"></a>nmale<span class="ot">=</span><span class="fu">length</span>(<span class="fu">which</span>(N[<span class="dv">1</span>,,<span class="dv">1</span>] <span class="sc">&gt;</span> <span class="dv">0</span>))</span>
+<span id="cb66-3"><a href="#cb66-3" tabindex="-1"></a>nfemale<span class="ot">=</span><span class="fu">length</span>(<span class="fu">which</span>(N[,<span class="dv">1</span>,<span class="dv">1</span>] <span class="sc">&gt;</span> <span class="dv">0</span>))</span>
+<span id="cb66-4"><a href="#cb66-4" tabindex="-1"></a>nrep<span class="ot">=</span><span class="fu">table</span>(N[,,<span class="dv">1</span>])</span>
+<span id="cb66-5"><a href="#cb66-5" tabindex="-1"></a>nrep<span class="ot">=</span><span class="fu">as.numeric</span>(<span class="fu">names</span>(nrep[<span class="fu">which</span>(<span class="fu">names</span>(nrep) <span class="sc">!=</span><span class="dv">0</span>)]))</span>
+<span id="cb66-6"><a href="#cb66-6" tabindex="-1"></a></span>
+<span id="cb66-7"><a href="#cb66-7" tabindex="-1"></a><span class="do">##############################</span></span>
+<span id="cb66-8"><a href="#cb66-8" tabindex="-1"></a><span class="do">## Expected Mean Square method</span></span>
+<span id="cb66-9"><a href="#cb66-9" tabindex="-1"></a><span class="do">##############################</span></span>
+<span id="cb66-10"><a href="#cb66-10" tabindex="-1"></a></span>
+<span id="cb66-11"><a href="#cb66-11" tabindex="-1"></a>mix1 <span class="ot">&lt;-</span> <span class="fu">lm</span>(yield<span class="sc">~</span> setf <span class="sc">+</span> setf<span class="sc">:</span>repf <span class="sc">+</span> </span>
+<span id="cb66-12"><a href="#cb66-12" tabindex="-1"></a>             femalef<span class="sc">:</span>malef<span class="sc">:</span>setf <span class="sc">+</span> malef<span class="sc">:</span>setf <span class="sc">+</span> femalef<span class="sc">:</span>setf, <span class="at">data=</span>DT)</span>
+<span id="cb66-13"><a href="#cb66-13" tabindex="-1"></a>MS <span class="ot">&lt;-</span> <span class="fu">anova</span>(mix1); MS</span></code></pre></div>
+<pre><code>## Analysis of Variance Table
+## 
+## Response: yield
+##                    Df  Sum Sq Mean Sq F value    Pr(&gt;F)    
+## setf                1  847836  847836 45.6296 1.097e-09 ***
+## setf:repf           4  144345   36086  1.9421  0.109652    
+## setf:malef          8  861053  107632  5.7926 5.032e-06 ***
+## setf:femalef        8  527023   65878  3.5455  0.001227 ** 
+## setf:femalef:malef 32  807267   25227  1.3577  0.129527    
+## Residuals          96 1783762   18581                      
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+<div class="sourceCode" id="cb68"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb68-1"><a href="#cb68-1" tabindex="-1"></a>ms1 <span class="ot">&lt;-</span> MS[<span class="st">&quot;setf:malef&quot;</span>,<span class="st">&quot;Mean Sq&quot;</span>]</span>
+<span id="cb68-2"><a href="#cb68-2" tabindex="-1"></a>ms2 <span class="ot">&lt;-</span> MS[<span class="st">&quot;setf:femalef&quot;</span>,<span class="st">&quot;Mean Sq&quot;</span>]</span>
+<span id="cb68-3"><a href="#cb68-3" tabindex="-1"></a>ms3 <span class="ot">&lt;-</span> MS[<span class="st">&quot;setf:femalef:malef&quot;</span>,<span class="st">&quot;Mean Sq&quot;</span>]</span>
+<span id="cb68-4"><a href="#cb68-4" tabindex="-1"></a>mse <span class="ot">&lt;-</span> MS[<span class="st">&quot;Residuals&quot;</span>,<span class="st">&quot;Mean Sq&quot;</span>]</span>
+<span id="cb68-5"><a href="#cb68-5" tabindex="-1"></a>nrep<span class="ot">=</span><span class="fu">length</span>(<span class="fu">unique</span>(DT<span class="sc">$</span>rep))</span>
+<span id="cb68-6"><a href="#cb68-6" tabindex="-1"></a>nfem<span class="ot">=</span><span class="fu">length</span>(<span class="fu">unique</span>(DT<span class="sc">$</span>female))</span>
+<span id="cb68-7"><a href="#cb68-7" tabindex="-1"></a>nmal<span class="ot">=</span><span class="fu">length</span>(<span class="fu">unique</span>(DT<span class="sc">$</span>male))</span>
+<span id="cb68-8"><a href="#cb68-8" tabindex="-1"></a>Vfm <span class="ot">&lt;-</span> (ms3<span class="sc">-</span>mse)<span class="sc">/</span>nrep; </span>
+<span id="cb68-9"><a href="#cb68-9" tabindex="-1"></a>Vf <span class="ot">&lt;-</span> (ms2<span class="sc">-</span>ms3)<span class="sc">/</span>(nrep<span class="sc">*</span>nmale); </span>
+<span id="cb68-10"><a href="#cb68-10" tabindex="-1"></a>Vm <span class="ot">&lt;-</span> (ms1<span class="sc">-</span>ms3)<span class="sc">/</span>(nrep<span class="sc">*</span>nfemale); </span>
+<span id="cb68-11"><a href="#cb68-11" tabindex="-1"></a></span>
+<span id="cb68-12"><a href="#cb68-12" tabindex="-1"></a>Va<span class="ot">=</span><span class="dv">4</span><span class="sc">*</span>Vm; <span class="co"># assuming no inbreeding (4/(1+F))</span></span>
+<span id="cb68-13"><a href="#cb68-13" tabindex="-1"></a>Va<span class="ot">=</span><span class="dv">4</span><span class="sc">*</span>Vf; <span class="co"># assuming no inbreeding (4/(1+F))</span></span>
+<span id="cb68-14"><a href="#cb68-14" tabindex="-1"></a>Vd<span class="ot">=</span><span class="dv">4</span><span class="sc">*</span>(Vfm); <span class="co"># assuming no inbreeding(4/(1+F)^2)</span></span>
+<span id="cb68-15"><a href="#cb68-15" tabindex="-1"></a>Vg<span class="ot">=</span><span class="fu">c</span>(Va,Vd); <span class="fu">names</span>(Vg) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;Va&quot;</span>,<span class="st">&quot;Vd&quot;</span>); Vg</span></code></pre></div>
+<pre><code>##        Va        Vd 
+## 10840.192  8861.659</code></pre>
+<div class="sourceCode" id="cb70"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb70-1"><a href="#cb70-1" tabindex="-1"></a><span class="do">##############################</span></span>
+<span id="cb70-2"><a href="#cb70-2" tabindex="-1"></a><span class="do">## REML method</span></span>
+<span id="cb70-3"><a href="#cb70-3" tabindex="-1"></a><span class="do">##############################</span></span>
+<span id="cb70-4"><a href="#cb70-4" tabindex="-1"></a></span>
+<span id="cb70-5"><a href="#cb70-5" tabindex="-1"></a>mix2 <span class="ot">&lt;-</span> <span class="fu">mmer</span>(yield<span class="sc">~</span> setf <span class="sc">+</span> setf<span class="sc">:</span>repf ,</span>
+<span id="cb70-6"><a href="#cb70-6" tabindex="-1"></a>            <span class="at">random=</span><span class="sc">~</span>femalef<span class="sc">:</span>malef<span class="sc">:</span>setf <span class="sc">+</span> malef<span class="sc">:</span>setf <span class="sc">+</span> femalef<span class="sc">:</span>setf, </span>
+<span id="cb70-7"><a href="#cb70-7" tabindex="-1"></a>            <span class="at">nIters=</span><span class="dv">3</span>,</span>
+<span id="cb70-8"><a href="#cb70-8" tabindex="-1"></a>            <span class="at">data=</span>DT, <span class="at">verbose =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb70-9"><a href="#cb70-9" tabindex="-1"></a>vc <span class="ot">&lt;-</span> <span class="fu">summary</span>(mix2)<span class="sc">$</span>varcomp; vc</span></code></pre></div>
+<pre><code>##                                  VarComp VarCompSE    Zratio Constraint
+## femalef:malef:setf.yield-yield  2235.754  2320.298 0.9635634   Positive
+## malef:setf.yield-yield          5464.494  3484.990 1.5680085   Positive
+## femalef:setf.yield-yield        2722.922  2316.795 1.1752969   Positive
+## units.yield-yield              18569.305  2665.240 6.9672171   Positive</code></pre>
+<div class="sourceCode" id="cb72"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb72-1"><a href="#cb72-1" tabindex="-1"></a>Vfm <span class="ot">&lt;-</span> vc[<span class="dv">1</span>,<span class="st">&quot;VarComp&quot;</span>]</span>
+<span id="cb72-2"><a href="#cb72-2" tabindex="-1"></a>Vm <span class="ot">&lt;-</span> vc[<span class="dv">2</span>,<span class="st">&quot;VarComp&quot;</span>]</span>
+<span id="cb72-3"><a href="#cb72-3" tabindex="-1"></a>Vf <span class="ot">&lt;-</span> vc[<span class="dv">3</span>,<span class="st">&quot;VarComp&quot;</span>]</span>
+<span id="cb72-4"><a href="#cb72-4" tabindex="-1"></a></span>
+<span id="cb72-5"><a href="#cb72-5" tabindex="-1"></a>Va<span class="ot">=</span><span class="dv">4</span><span class="sc">*</span>Vm; <span class="co"># assuming no inbreeding (4/(1+F))</span></span>
+<span id="cb72-6"><a href="#cb72-6" tabindex="-1"></a>Va<span class="ot">=</span><span class="dv">4</span><span class="sc">*</span>Vf; <span class="co"># assuming no inbreeding (4/(1+F))</span></span>
+<span id="cb72-7"><a href="#cb72-7" tabindex="-1"></a>Vd<span class="ot">=</span><span class="dv">4</span><span class="sc">*</span>(Vfm); <span class="co"># assuming no inbreeding(4/(1+F)^2)</span></span>
+<span id="cb72-8"><a href="#cb72-8" tabindex="-1"></a>Vg<span class="ot">=</span><span class="fu">c</span>(Va,Vd); <span class="fu">names</span>(Vg) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;Va&quot;</span>,<span class="st">&quot;Vd&quot;</span>); Vg</span></code></pre></div>
+<pre><code>##        Va        Vd 
+## 10891.689  8943.017</code></pre>
+<p>As can be seen, the REML method is easier than manipulating the MS
+and we arrive to the same results.</p>
+</div>
+</div>
+<div id="gwas-by-gblup" class="section level3">
+<h3>4) GWAS by GBLUP</h3>
+<p>Gualdron-Duarte et al. (2014) and Bernal-Rubio et al. (2016) proved
+that in (SingleStep)GBLUP or RRBLUP/SNP-BLUP, dividing the estimate of
+the marker effect by its standard error is mathematically equivalent to
+fixed regression EMMAX GWAS, even if markers are estimated as random
+effects in GBLUP and as fixed effects in EMMAX. That way fitting a GBLUP
+model is enough to perform GWAS for additive and on-additive
+effects.</p>
+<p>Let us use the DT_cpdata dataset to explore the GWAS by GBLUP
+method</p>
+<div class="sourceCode" id="cb74"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb74-1"><a href="#cb74-1" tabindex="-1"></a><span class="fu">data</span>(DT_cpdata)</span>
+<span id="cb74-2"><a href="#cb74-2" tabindex="-1"></a>DT <span class="ot">&lt;-</span> DT_cpdata</span>
+<span id="cb74-3"><a href="#cb74-3" tabindex="-1"></a>GT <span class="ot">&lt;-</span> GT_cpdata[,<span class="dv">1</span><span class="sc">:</span><span class="dv">200</span>]</span>
+<span id="cb74-4"><a href="#cb74-4" tabindex="-1"></a>MP <span class="ot">&lt;-</span> MP_cpdata</span>
+<span id="cb74-5"><a href="#cb74-5" tabindex="-1"></a><span class="do">#### create the variance-covariance matrix</span></span>
+<span id="cb74-6"><a href="#cb74-6" tabindex="-1"></a>A <span class="ot">&lt;-</span> <span class="fu">A.mat</span>(GT) <span class="co"># additive relationship matrix</span></span>
+<span id="cb74-7"><a href="#cb74-7" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="fu">nrow</span>(DT) <span class="co"># to be used for degrees of freedom</span></span>
+<span id="cb74-8"><a href="#cb74-8" tabindex="-1"></a>k <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="co"># to be used for degrees of freedom (number of levels in fixed effects)</span></span></code></pre></div>
+<p>First we fit a regular GWAS/EMMAX using the GWAS function available
+in sommer that first calculates variance components and then fits a
+regression marker by marker as a fixed effect.</p>
+<div class="sourceCode" id="cb75"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb75-1"><a href="#cb75-1" tabindex="-1"></a><span class="do">###########################</span></span>
+<span id="cb75-2"><a href="#cb75-2" tabindex="-1"></a><span class="do">#### Regular GWAS/EMMAX approach</span></span>
+<span id="cb75-3"><a href="#cb75-3" tabindex="-1"></a><span class="do">###########################</span></span>
+<span id="cb75-4"><a href="#cb75-4" tabindex="-1"></a>mix2 <span class="ot">&lt;-</span> <span class="fu">GWAS</span>(color<span class="sc">~</span><span class="dv">1</span>,</span>
+<span id="cb75-5"><a href="#cb75-5" tabindex="-1"></a>             <span class="at">random=</span><span class="sc">~</span><span class="fu">vsr</span>(id, <span class="at">Gu=</span>A) <span class="sc">+</span> Rowf <span class="sc">+</span> Colf,</span>
+<span id="cb75-6"><a href="#cb75-6" tabindex="-1"></a>             <span class="at">rcov=</span><span class="sc">~</span>units, <span class="at">M=</span>GT, <span class="at">gTerm =</span> <span class="st">&quot;u:id&quot;</span>,</span>
+<span id="cb75-7"><a href="#cb75-7" tabindex="-1"></a>             <span class="at">verbose =</span> <span class="cn">FALSE</span>, <span class="at">nIters=</span><span class="dv">3</span>,</span>
+<span id="cb75-8"><a href="#cb75-8" tabindex="-1"></a>             <span class="at">data=</span>DT)</span></code></pre></div>
+<pre><code>## Performing GWAS evaluation</code></pre>
+<p>To compare EMMAX to the approach proposed by Gualdron-Duarte et
+al. (2014) and Bernal-Rubio et al. (2016) we will start fitting an
+RRBLUP/SNP-BLUP model to show that the estimate of the marker effect by
+its standard error is mathematically equivalent to fixed regression
+EMMAX GWAS.</p>
+<div class="sourceCode" id="cb77"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb77-1"><a href="#cb77-1" tabindex="-1"></a><span class="do">###########################</span></span>
+<span id="cb77-2"><a href="#cb77-2" tabindex="-1"></a><span class="do">#### GWAS by RRBLUP approach</span></span>
+<span id="cb77-3"><a href="#cb77-3" tabindex="-1"></a><span class="do">###########################</span></span>
+<span id="cb77-4"><a href="#cb77-4" tabindex="-1"></a>Z <span class="ot">&lt;-</span> GT[<span class="fu">as.character</span>(DT<span class="sc">$</span>id),]</span>
+<span id="cb77-5"><a href="#cb77-5" tabindex="-1"></a>mixRRBLUP <span class="ot">&lt;-</span> <span class="fu">mmer</span>(color<span class="sc">~</span><span class="dv">1</span>,</span>
+<span id="cb77-6"><a href="#cb77-6" tabindex="-1"></a>              <span class="at">random=</span><span class="sc">~</span><span class="fu">vsr</span>(Z) <span class="sc">+</span> Rowf <span class="sc">+</span> Colf,</span>
+<span id="cb77-7"><a href="#cb77-7" tabindex="-1"></a>              <span class="at">rcov=</span><span class="sc">~</span>units, <span class="at">nIters=</span><span class="dv">3</span>,</span>
+<span id="cb77-8"><a href="#cb77-8" tabindex="-1"></a>              <span class="at">verbose =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb77-9"><a href="#cb77-9" tabindex="-1"></a>              <span class="at">data=</span>DT)</span>
+<span id="cb77-10"><a href="#cb77-10" tabindex="-1"></a></span>
+<span id="cb77-11"><a href="#cb77-11" tabindex="-1"></a>a <span class="ot">&lt;-</span> mixRRBLUP<span class="sc">$</span>U<span class="sc">$</span><span class="st">`</span><span class="at">u:Z</span><span class="st">`</span><span class="sc">$</span>color <span class="co"># marker effects</span></span>
+<span id="cb77-12"><a href="#cb77-12" tabindex="-1"></a>se.a <span class="ot">&lt;-</span> <span class="fu">sqrt</span>(<span class="fu">diag</span>(<span class="fu">kronecker</span>(<span class="fu">diag</span>(<span class="fu">ncol</span>(Z)),mixRRBLUP<span class="sc">$</span>sigma<span class="sc">$</span><span class="st">`</span><span class="at">u:Z</span><span class="st">`</span>) <span class="sc">-</span> mixRRBLUP<span class="sc">$</span>PevU<span class="sc">$</span><span class="st">`</span><span class="at">u:Z</span><span class="st">`</span><span class="sc">$</span>color)) <span class="co"># SE of marker effects</span></span>
+<span id="cb77-13"><a href="#cb77-13" tabindex="-1"></a>t.stat <span class="ot">&lt;-</span> a<span class="sc">/</span>se.a <span class="co"># t-statistic</span></span>
+<span id="cb77-14"><a href="#cb77-14" tabindex="-1"></a>pvalRRBLUP <span class="ot">&lt;-</span> <span class="fu">dt</span>(t.stat,<span class="at">df=</span>n<span class="sc">-</span>k<span class="dv">-1</span>) <span class="co"># -log10(pval)</span></span></code></pre></div>
+<p>Instead of fitting the RRBLUP/SNP-BLUP model we can fit a GBLUP model
+which is less computationally demanding and recover marker effects and
+their standard errors from the genotype effects.</p>
+<div class="sourceCode" id="cb78"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb78-1"><a href="#cb78-1" tabindex="-1"></a><span class="do">###########################</span></span>
+<span id="cb78-2"><a href="#cb78-2" tabindex="-1"></a><span class="do">#### GWAS by GBLUP approach</span></span>
+<span id="cb78-3"><a href="#cb78-3" tabindex="-1"></a><span class="do">###########################</span></span>
+<span id="cb78-4"><a href="#cb78-4" tabindex="-1"></a>M<span class="ot">&lt;-</span> GT</span>
+<span id="cb78-5"><a href="#cb78-5" tabindex="-1"></a>MMT <span class="ot">&lt;-</span><span class="fu">tcrossprod</span>(M) <span class="do">## MM&#39; = additive relationship matrix</span></span>
+<span id="cb78-6"><a href="#cb78-6" tabindex="-1"></a>MMTinv<span class="ot">&lt;-</span><span class="fu">solve</span>(MMT <span class="sc">+</span> <span class="fu">diag</span>(<span class="fl">1e-6</span>, <span class="fu">ncol</span>(MMT), <span class="fu">ncol</span>(MMT))) <span class="do">## inverse of MM&#39;</span></span>
+<span id="cb78-7"><a href="#cb78-7" tabindex="-1"></a>MTMMTinv<span class="ot">&lt;-</span><span class="fu">t</span>(M)<span class="sc">%*%</span>MMTinv <span class="co"># M&#39; %*% (M&#39;M)-</span></span>
+<span id="cb78-8"><a href="#cb78-8" tabindex="-1"></a>mixGBLUP <span class="ot">&lt;-</span> <span class="fu">mmer</span>(color<span class="sc">~</span><span class="dv">1</span>,</span>
+<span id="cb78-9"><a href="#cb78-9" tabindex="-1"></a>             <span class="at">random=</span><span class="sc">~</span><span class="fu">vsr</span>(id, <span class="at">Gu=</span>MMT) <span class="sc">+</span> Rowf <span class="sc">+</span> Colf,</span>
+<span id="cb78-10"><a href="#cb78-10" tabindex="-1"></a>             <span class="at">rcov=</span><span class="sc">~</span>units, <span class="at">nIters=</span><span class="dv">3</span>,</span>
+<span id="cb78-11"><a href="#cb78-11" tabindex="-1"></a>             <span class="at">verbose =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb78-12"><a href="#cb78-12" tabindex="-1"></a>             <span class="at">data=</span>DT)</span>
+<span id="cb78-13"><a href="#cb78-13" tabindex="-1"></a>a.from.g <span class="ot">&lt;-</span>MTMMTinv<span class="sc">%*%</span><span class="fu">matrix</span>(mixGBLUP<span class="sc">$</span>U<span class="sc">$</span><span class="st">`</span><span class="at">u:id</span><span class="st">`</span><span class="sc">$</span>color,<span class="at">ncol=</span><span class="dv">1</span>)</span>
+<span id="cb78-14"><a href="#cb78-14" tabindex="-1"></a>var.g <span class="ot">&lt;-</span> <span class="fu">kronecker</span>(MMT,mixGBLUP<span class="sc">$</span>sigma<span class="sc">$</span><span class="st">`</span><span class="at">u:id</span><span class="st">`</span>) <span class="sc">-</span> mixGBLUP<span class="sc">$</span>PevU<span class="sc">$</span><span class="st">`</span><span class="at">u:id</span><span class="st">`</span><span class="sc">$</span>color</span>
+<span id="cb78-15"><a href="#cb78-15" tabindex="-1"></a>var.a.from.g <span class="ot">&lt;-</span> <span class="fu">t</span>(M)<span class="sc">%*%</span>MMTinv<span class="sc">%*%</span> (var.g) <span class="sc">%*%</span> <span class="fu">t</span>(MMTinv)<span class="sc">%*%</span>M</span>
+<span id="cb78-16"><a href="#cb78-16" tabindex="-1"></a>se.a.from.g <span class="ot">&lt;-</span> <span class="fu">sqrt</span>(<span class="fu">diag</span>(var.a.from.g))</span>
+<span id="cb78-17"><a href="#cb78-17" tabindex="-1"></a>t.stat.from.g <span class="ot">&lt;-</span> a.from.g<span class="sc">/</span>se.a.from.g <span class="co"># t-statistic</span></span>
+<span id="cb78-18"><a href="#cb78-18" tabindex="-1"></a>pvalGBLUP <span class="ot">&lt;-</span> <span class="fu">dt</span>(t.stat.from.g,<span class="at">df=</span>n<span class="sc">-</span>k<span class="dv">-1</span>) <span class="co"># -log10(pval)</span></span></code></pre></div>
+<p>Now we can look at the p-values coming from the 3 approaches to
+indeed show that results are equivalent.</p>
+<div class="sourceCode" id="cb79"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb79-1"><a href="#cb79-1" tabindex="-1"></a><span class="do">###########################</span></span>
+<span id="cb79-2"><a href="#cb79-2" tabindex="-1"></a><span class="do">#### Compare results</span></span>
+<span id="cb79-3"><a href="#cb79-3" tabindex="-1"></a><span class="do">###########################</span></span>
+<span id="cb79-4"><a href="#cb79-4" tabindex="-1"></a><span class="co"># plot(mix2$scores[,1], main=&quot;GWAS&quot;)</span></span>
+<span id="cb79-5"><a href="#cb79-5" tabindex="-1"></a><span class="fu">plot</span>(<span class="sc">-</span><span class="fu">log</span>(pvalRRBLUP), <span class="at">main=</span><span class="st">&quot;GWAS by RRBLUP/SNP-BLUP&quot;</span>) </span></code></pre></div>
+<p><img role="img" src="data:image/png;base64,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" /><!-- --></p>
+<div class="sourceCode" id="cb80"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb80-1"><a href="#cb80-1" tabindex="-1"></a><span class="fu">plot</span>(<span class="sc">-</span><span class="fu">log</span>(pvalGBLUP), <span class="at">main=</span><span class="st">&quot;GWAS by GBLUP&quot;</span>)</span></code></pre></div>
+<p><img role="img" src="data:image/png;base64,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" /><!-- --></p>
+</div>
+<div id="final-remarks" class="section level3">
+<h3>Final remarks</h3>
+<p>Keep in mind that mmer uses a direct inversion (DI) algorithm which
+can be very slow for large datasets with many records. When datasets
+have more records than coefficients to be estimated please shift to the
+use of the mmec function.</p>
+</div>
+</div>
+<div id="literature" class="section level2">
+<h2>Literature</h2>
+<p>Covarrubias-Pazaran G. 2016. Genome assisted prediction of
+quantitative traits using the R package sommer. PLoS ONE 11(6):1-15.</p>
+<p>Covarrubias-Pazaran G. 2018. Software update: Moving the R package
+sommer to multivariate mixed models for genome-assisted prediction. doi:
+<a href="https://doi.org/10.1101/354639" class="uri">https://doi.org/10.1101/354639</a></p>
+<p>Bernardo Rex. 2010. Breeding for quantitative traits in plants.
+Second edition. Stemma Press. 390 pp.</p>
+<p>Gilmour et al. 1995. Average Information REML: An efficient algorithm
+for variance parameter estimation in linear mixed models. Biometrics
+51(4):1440-1450.</p>
+<p>Henderson C.R. 1975. Best Linear Unbiased Estimation and Prediction
+under a Selection Model. Biometrics vol. 31(2):423-447.</p>
+<p>Kang et al. 2008. Efficient control of population structure in model
+organism association mapping. Genetics 178:1709-1723.</p>
+<p>Lee, D.-J., Durban, M., and Eilers, P.H.C. (2013). Efficient
+two-dimensional smoothing with P-spline ANOVA mixed models and nested
+bases. Computational Statistics and Data Analysis, 61, 22 - 37.</p>
+<p>Lee et al. 2015. MTG2: An efficient algorithm for multivariate linear
+mixed model analysis based on genomic information. Cold Spring Harbor.
+doi: <a href="http://dx.doi.org/10.1101/027201" class="uri">http://dx.doi.org/10.1101/027201</a>.</p>
+<p>Maier et al. 2015. Joint analysis of psychiatric disorders increases
+accuracy of risk prediction for schizophrenia, bipolar disorder, and
+major depressive disorder. Am J Hum Genet; 96(2):283-294.</p>
+<p>Rodriguez-Alvarez, Maria Xose, et al. Correcting for spatial
+heterogeneity in plant breeding experiments with P-splines. Spatial
+Statistics 23 (2018): 52-71.</p>
+<p>Searle. 1993. Applying the EM algorithm to calculating ML and REML
+estimates of variance components. Paper invited for the 1993 American
+Statistical Association Meeting, San Francisco.</p>
+<p>Yu et al. 2006. A unified mixed-model method for association mapping
+that accounts for multiple levels of relatedness. Genetics
+38:203-208.</p>
+<p>Tunnicliffe W. 1989. On the use of marginal likelihood in time series
+model estimation. JRSS 51(1):15-27.</p>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
